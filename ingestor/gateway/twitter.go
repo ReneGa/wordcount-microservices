@@ -47,6 +47,7 @@ func (a anacondaTwitter) Tweets(query string) domain.Tweets {
 
 	go func() {
 		defer close(out)
+		defer stream.Stop()
 		for {
 			select {
 			case item := <-anacondaChan:
