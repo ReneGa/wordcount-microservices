@@ -4,15 +4,13 @@ import "time"
 
 // Tweet is the textual content of a tweet
 type Tweet struct {
+	ID   string
 	Text string
 	Time time.Time
 }
 
 // Tweets are a stoppable stream of tweets
 type Tweets struct {
-	Tweets <-chan Tweet
-	Stop   chan<- struct{}
+	Data <-chan Tweet
+	Stop chan<- bool
 }
-
-// StopTweetsMessage stops a Tweets stream
-type StopTweetsMessage struct{}

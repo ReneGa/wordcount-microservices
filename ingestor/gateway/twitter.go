@@ -1,7 +1,9 @@
-package gateways
+package gateway
 
 import (
 	"net/url"
+
+	"log"
 
 	"github.com/ReneGa/tweetcount-microservices/ingestor/client"
 	"github.com/ReneGa/tweetcount-microservices/ingestor/domain"
@@ -13,8 +15,8 @@ type Twitter interface {
 	Tweets(query string) domain.Tweets
 }
 
-// AnacondaTwitter is a Twitter client implemented using the Anaconda library
-func AnacondaTwitter(
+// NewAnacondaTwitter creates a new Twitter client
+func NewAnacondaTwitter(
 	anaconda client.Anaconda,
 	key string,
 	keySecret string,
@@ -36,11 +38,11 @@ func (a anacondaTwitter) Tweets(query string) domain.Tweets {
 	})
 	anacondaChan := stream.C()
 	out := make(chan domain.Tweet)
-	stop := make(chan struct{})
+	stop := make(chan bool)
 
 	tweets := domain.Tweets{
-		Tweets: out,
-		Stop:   stop,
+		Data: out,
+		Stop: stop,
 	}
 
 	go func() {
@@ -48,10 +50,12 @@ func (a anacondaTwitter) Tweets(query string) domain.Tweets {
 		for {
 			select {
 			case item := <-anacondaChan:
+				log.Println(item)
 				if t, ok := item.(anaconda.Tweet); ok {
 					tweetTime, _ := t.CreatedAtTime()
 					out <- domain.Tweet{
 						Text: t.Text,
+						ID:   t.IdStr,
 						Time: tweetTime,
 					}
 				}
