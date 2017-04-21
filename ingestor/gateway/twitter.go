@@ -3,8 +3,6 @@ package gateway
 import (
 	"net/url"
 
-	"log"
-
 	"github.com/ReneGa/tweetcount-microservices/ingestor/client"
 	"github.com/ReneGa/tweetcount-microservices/ingestor/domain"
 	"github.com/chimeracoder/anaconda"
@@ -51,7 +49,6 @@ func (a anacondaTwitter) Tweets(query string) domain.Tweets {
 		for {
 			select {
 			case item := <-anacondaChan:
-				log.Println(item)
 				if t, ok := item.(anaconda.Tweet); ok {
 					tweetTime, _ := t.CreatedAtTime()
 					out <- domain.Tweet{
