@@ -10,7 +10,7 @@ import (
 type Anaconda interface {
 	SetConsumerKey(key string)
 	SetConsumerSecret(keySecret string)
-	NewTwitterAPI(token string, tokenSecret string) AnacondaAPI
+	NewTwitterAPI(token string, tokenSecret string) TwitterAPI
 }
 
 type anacondaWrapper struct{}
@@ -28,34 +28,34 @@ func (a *anacondaWrapper) SetConsumerSecret(keySecret string) {
 	anaconda.SetConsumerSecret(keySecret)
 }
 
-func (a *anacondaWrapper) NewTwitterAPI(token string, tokenSecret string) AnacondaAPI {
-	anacondaAPI := anacondaAPI(*anaconda.NewTwitterApi(token, tokenSecret))
-	return &anacondaAPI
+func (a *anacondaWrapper) NewTwitterAPI(token string, tokenSecret string) TwitterAPI {
+	twitterAPI := twitterAPI(*anaconda.NewTwitterApi(token, tokenSecret))
+	return &twitterAPI
 }
 
-// AnacondaAPI is an interface wrapper around the anaconda twitter API
-type AnacondaAPI interface {
-	PublicStreamFilter(values url.Values) AnacondaStream
+// TwitterAPI is an interface wrapper around the anaconda twitter API
+type TwitterAPI interface {
+	PublicStreamFilter(values url.Values) TwitterStream
 }
 
-type anacondaAPI anaconda.TwitterApi
+type twitterAPI anaconda.TwitterApi
 
-func (a *anacondaAPI) PublicStreamFilter(values url.Values) AnacondaStream {
-	return &anacondaStream{anaconda.TwitterApi(*a).PublicStreamFilter(values)}
+func (a *twitterAPI) PublicStreamFilter(values url.Values) TwitterStream {
+	return &twitterStream{anaconda.TwitterApi(*a).PublicStreamFilter(values)}
 }
 
-type anacondaStream struct{ *anaconda.Stream }
+type twitterStream struct{ *anaconda.Stream }
 
-func (a *anacondaStream) C() chan interface{} {
+func (a *twitterStream) C() chan interface{} {
 	return a.Stream.C
 }
 
-func (a *anacondaStream) Stop() {
+func (a *twitterStream) Stop() {
 	a.Stream.Stop()
 }
 
-// AnacondaStream is an interface wrapper around the anaocnda.Stream struct
-type AnacondaStream interface {
+// TwitterStream is an interface wrapper around the anaconda.Stream struct
+type TwitterStream interface {
 	C() chan interface{}
 	Stop()
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,7 +21,10 @@ func requireEnv(name string) string {
 	return value
 }
 
+var address = flag.String("address", "localhost:8080", "Address to listen on")
+
 func main() {
+	flag.Parse()
 
 	key := requireEnv("TWITTER_CONSUMER_KEY")
 	keySecret := requireEnv("TWITTER_CONSUMER_KEY_SECRET")
@@ -28,28 +32,27 @@ func main() {
 	tokenSecret := requireEnv("TWITTER_ACCESS_TOKEN_SECRET")
 
 	anaconda := client.NewAnaconda()
-	twitterGateway := gateway.NewAnacondaTwitter(
-		anaconda,
-		key,
-		keySecret,
-		token,
-		tokenSecret,
-	)
+	anaconda.SetConsumerKey(key)
+	anaconda.SetConsumerSecret(keySecret)
+	newTwitterAPI := func() client.TwitterAPI {
+		return anaconda.NewTwitterAPI(token, tokenSecret)
+	}
+
+	twitterGateway := gateway.NewTwitter(newTwitterAPI)
 
 	tweetsResource := resource.Tweets{Gateway: twitterGateway}
 
 	router := httprouter.New()
 	router.GET("/tweets", tweetsResource.GET)
 
-	address := "localhost:8080"
 	done := make(chan bool)
 	go func() {
-		err := http.ListenAndServe(address, router)
+		err := http.ListenAndServe(*address, router)
 		if err != nil {
 			log.Fatal(err)
 		}
 		done <- true
 	}()
-	log.Println("listening...")
+	log.Printf("listening on %s", *address)
 	<-done
 }

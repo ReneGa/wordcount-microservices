@@ -2,10 +2,12 @@ package gateway
 
 import (
 	"net/url"
+	"time"
+
+	"reflect"
 
 	"github.com/ReneGa/tweetcount-microservices/ingestor/client"
 	"github.com/ReneGa/tweetcount-microservices/ingestor/domain"
-	"github.com/chimeracoder/anaconda"
 )
 
 // Twitter is a gateway to the Twitter streaming API
@@ -13,28 +15,24 @@ type Twitter interface {
 	Tweets(query string) domain.Tweets
 }
 
-// NewAnacondaTwitter creates a new Twitter client
-func NewAnacondaTwitter(
-	anaconda client.Anaconda,
-	key string,
-	keySecret string,
-	token string,
-	tokenSecret string,
+// NewTwitter creates a new Twitter client
+func NewTwitter(
+	newTwitterAPI func() client.TwitterAPI,
 ) Twitter {
-	anaconda.SetConsumerKey(key)
-	anaconda.SetConsumerSecret(keySecret)
-	api := anaconda.NewTwitterAPI(token, tokenSecret)
-	return &anacondaTwitter{api}
+	return &twitter{newTwitterAPI}
 }
 
-type anacondaTwitter struct{ client.AnacondaAPI }
+type twitter struct {
+	newTwitterAPI func() client.TwitterAPI
+}
 
 // Tweets returns a stream of public Tweets for a given search query.
-func (a anacondaTwitter) Tweets(query string) domain.Tweets {
-	stream := a.PublicStreamFilter(url.Values{
+func (a twitter) Tweets(query string) domain.Tweets {
+	api := a.newTwitterAPI()
+	stream := api.PublicStreamFilter(url.Values{
 		"track": {query},
 	})
-	anacondaChan := stream.C()
+	items := stream.C()
 	out := make(chan domain.Tweet)
 	stop := make(chan bool)
 
@@ -48,14 +46,16 @@ func (a anacondaTwitter) Tweets(query string) domain.Tweets {
 		defer stream.Stop()
 		for {
 			select {
-			case item := <-anacondaChan:
-				if t, ok := item.(anaconda.Tweet); ok {
-					tweetTime, _ := t.CreatedAtTime()
-					out <- domain.Tweet{
-						Text: t.Text,
-						ID:   t.IdStr,
-						Time: tweetTime,
-					}
+			case item := <-items:
+				itemValue := reflect.ValueOf(item)
+				Text := itemValue.FieldByName("Text").String()
+				ID := itemValue.FieldByName("IdStr").String()
+				timeString := itemValue.FieldByName("CreatedAt").String()
+				Time, _ := time.Parse(time.RubyDate, timeString)
+				out <- domain.Tweet{
+					Text: Text,
+					ID:   ID,
+					Time: Time,
 				}
 			case <-stop:
 				return
