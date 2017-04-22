@@ -2,7 +2,7 @@ package domain
 
 import "strings"
 
-// removeWords removes the given stop words from the given tweet
+// removeWords removes the given stop words from the given word slice
 func removeWords(wordsToRemove WordSet, words []string) []string {
 	filteredWords := make([]string, 0, len(words))
 	for _, word := range words {
