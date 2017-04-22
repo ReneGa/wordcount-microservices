@@ -13,9 +13,9 @@ func removeWords(wordsToRemove WordSet, words []string) []string {
 	return filteredWords
 }
 
-// RemoveStopWords removes stop words from a given tweet and returns
+// FilterStopWords removes stop words from a given tweet and returns
 // the remaining words in their original order.
-func RemoveStopWords(stopWords WordSet, tweet Tweet) TweetWords {
+func FilterStopWords(stopWords WordSet, tweet Tweet) TweetWords {
 	words := strings.Split(tweet.Text, " ")
 	return TweetWords{
 		Words:     removeWords(stopWords, words),
