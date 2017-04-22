@@ -4,9 +4,10 @@ import "time"
 
 // Tweet is the domain object representing a tweet
 type Tweet struct {
-	ID   string
-	Text string
-	Time time.Time
+	ID       string
+	Text     string
+	Language string
+	Time     time.Time
 }
 
 // TweetWords represents the words contained in a tweet
