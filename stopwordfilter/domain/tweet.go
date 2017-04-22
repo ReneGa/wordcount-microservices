@@ -21,3 +21,9 @@ type Tweets struct {
 	Data <-chan Tweet
 	Stop chan<- bool
 }
+
+// TweetsWords is a stoppable stream of TweetWords
+type TweetsWords struct {
+	Data <-chan TweetWords
+	Stop chan<- bool
+}
