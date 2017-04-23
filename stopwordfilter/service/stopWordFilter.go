@@ -20,12 +20,14 @@ type stopWordFilter struct {
 }
 
 func (s *stopWordFilter) TweetsWords(tweets domain.Tweets) domain.TweetsWords {
+
 	stopWordSetIDs := s.repository.List()
 	languages := make([]language.Tag, len(stopWordSetIDs))
 	for i, ID := range stopWordSetIDs {
 		languages[i] = language.Make(ID)
 	}
 	matcher := language.NewMatcher(languages)
+
 	data := make(chan domain.TweetWords)
 	stop := make(chan bool)
 
