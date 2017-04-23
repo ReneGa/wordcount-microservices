@@ -11,17 +11,16 @@ type StopWordFilter interface {
 	TweetsWords(tweets domain.Tweets) domain.TweetsWords
 }
 
-func NewStopWordFilter(repository repository.WordSet, fallbackLanguage string) StopWordFilter {
-	return &stopWordFilter{repository, fallbackLanguage}
+func NewStopWordFilter(repository repository.WordSet) StopWordFilter {
+	return &stopWordFilter{repository}
 }
 
 type stopWordFilter struct {
-	repository       repository.WordSet
-	fallbackLanguage string
+	repository repository.WordSet
 }
 
 func (s *stopWordFilter) TweetsWords(tweets domain.Tweets) domain.TweetsWords {
-	stopWordSetIDs := append([]string{s.fallbackLanguage}, s.repository.List()...)
+	stopWordSetIDs := s.repository.List()
 	languages := make([]language.Tag, len(stopWordSetIDs))
 	for i, ID := range stopWordSetIDs {
 		languages[i] = language.Make(ID)
