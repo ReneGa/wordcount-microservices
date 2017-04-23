@@ -24,16 +24,15 @@ func requireEnv(name string) string {
 }
 
 var address = flag.String("address", "localhost:8081", "Address to listen on")
-var tweetsURL = flag.String("tweetsURL", "localhost:8080", "URL of the tweet producer to connect to")
+var tweetsURL = flag.String("tweetsURL", "http://localhost:8080/tweets", "URL of the tweet producer to connect to")
 var stopWordsDirectory = flag.String("stopWordsDirectory", "stopwords/", "Directory to load stopwords files from")
-var stopWordsFallbackLanguage = flag.String("fallbackLanguage", "en-US", "Fallback stopwords language")
 
 func main() {
 	flag.Parse()
 
 	wordSetDataMapper := datamapper.NewWordSet(*stopWordsDirectory)
 	wordSetRepository := repository.NewWordSet(wordSetDataMapper)
-	stopWordFilterService := service.NewStopWordFilter(wordSetRepository, *stopWordsFallbackLanguage)
+	stopWordFilterService := service.NewStopWordFilter(wordSetRepository)
 	tweetsGateway := gateway.NewTweets(http.DefaultClient, *tweetsURL)
 	tweetsWordsResource := resource.TweetsWords{
 		Gateway: tweetsGateway,
