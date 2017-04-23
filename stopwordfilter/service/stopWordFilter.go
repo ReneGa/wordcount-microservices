@@ -11,6 +11,7 @@ type StopWordFilter interface {
 	TweetsWords(tweets domain.Tweets) domain.TweetsWords
 }
 
+// NewStopWordFilter creates a new stop word filter service
 func NewStopWordFilter(repository repository.WordSet) StopWordFilter {
 	return &stopWordFilter{repository}
 }
