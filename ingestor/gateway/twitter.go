@@ -50,12 +50,14 @@ func (a twitter) Tweets(query string) domain.Tweets {
 				itemValue := reflect.ValueOf(item)
 				Text := itemValue.FieldByName("Text").String()
 				ID := itemValue.FieldByName("IdStr").String()
+				Language := itemValue.FieldByName("Lang").String()
 				timeString := itemValue.FieldByName("CreatedAt").String()
 				Time, _ := time.Parse(time.RubyDate, timeString)
 				out <- domain.Tweet{
-					Text: Text,
-					ID:   ID,
-					Time: Time,
+					Text:     Text,
+					ID:       ID,
+					Time:     Time,
+					Language: Language,
 				}
 			case <-stop:
 				return
