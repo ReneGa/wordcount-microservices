@@ -30,8 +30,8 @@ var stopWordsDirectory = flag.String("stopWordsDirectory", "stopwords/", "Direct
 func main() {
 	flag.Parse()
 
-	wordSetDataMapper := datamapper.NewWordSet(*stopWordsDirectory)
-	wordSetRepository := repository.NewWordSet(wordSetDataMapper)
+	wordSetDataMapper := datamapper.NewStopWordSet(*stopWordsDirectory)
+	wordSetRepository := repository.NewStopWordSet(wordSetDataMapper)
 	stopWordFilterService := service.NewStopWordFilter(wordSetRepository)
 	tweetsGateway := gateway.NewTweets(http.DefaultClient, *tweetsURL)
 	tweetsWordsResource := resource.TweetsWords{

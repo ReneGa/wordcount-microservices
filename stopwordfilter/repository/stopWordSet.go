@@ -7,14 +7,14 @@ import (
 	"github.com/ReneGa/tweetcount-microservices/stopwordfilter/domain"
 )
 
-// WordSet is a word set repository
-type WordSet interface {
+// StopWordSet is a word set repository
+type StopWordSet interface {
 	Get(ID string) domain.WordSet
 	List() []string
 }
 
-// NewWordSet creates a new WordSet repository
-func NewWordSet(datamapper datamapper.WordSet) WordSet {
+// NewStopWordSet creates a new StopWordSet repository
+func NewStopWordSet(datamapper datamapper.StopWordSet) StopWordSet {
 	return &wordSet{
 		cache:      map[string]domain.WordSet{},
 		datamapper: datamapper,
@@ -24,7 +24,7 @@ func NewWordSet(datamapper datamapper.WordSet) WordSet {
 type wordSet struct {
 	sync.RWMutex
 	cache      map[string]domain.WordSet
-	datamapper datamapper.WordSet
+	datamapper datamapper.StopWordSet
 }
 
 func (w *wordSet) List() []string {
