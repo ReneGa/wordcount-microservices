@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/ReneGa/tweetcount-microservices/stopwordfilter/domain"
 	"github.com/ReneGa/tweetcount-microservices/stopwordfilter/repository"
 	"golang.org/x/text/language"
@@ -12,12 +14,12 @@ type StopWordFilter interface {
 }
 
 // NewStopWordFilter creates a new stop word filter service
-func NewStopWordFilter(repository repository.WordSet) StopWordFilter {
+func NewStopWordFilter(repository repository.StopWordSet) StopWordFilter {
 	return &stopWordFilter{repository}
 }
 
 type stopWordFilter struct {
-	repository repository.WordSet
+	repository repository.StopWordSet
 }
 
 func (s *stopWordFilter) TweetsWords(tweets domain.Tweets) domain.TweetsWords {
@@ -41,6 +43,7 @@ func (s *stopWordFilter) TweetsWords(tweets domain.Tweets) domain.TweetsWords {
 		for tweet := range tweets.Data {
 			_, i, _ := matcher.Match(language.Make(tweet.Language))
 			stopWords := s.repository.Get(stopWordSetIDs[i])
+			log.Println(stopWordSetIDs[i])
 			data <- domain.FilterStopWords(stopWords, tweet)
 		}
 	}()

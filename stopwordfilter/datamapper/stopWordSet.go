@@ -13,23 +13,23 @@ import (
 
 const wordSetFileSuffix = ".txt"
 
-// WordSet is a word set datamapper
-type WordSet interface {
+// StopWordSet is a stopword set datamapper
+type StopWordSet interface {
 	Get(ID string) domain.WordSet
 	List() []string
 }
 
-type wordSet struct {
+type stopWordSet struct {
 	wordSetsDirectory string
 }
 
-// NewWordSet creates a new WordSet flat-file datamapper
-func NewWordSet(wordSetsDirectory string) WordSet {
-	return &wordSet{wordSetsDirectory}
+// NewStopWordSet creates a new WordSet flat-file datamapper
+func NewStopWordSet(wordSetsDirectory string) StopWordSet {
+	return &stopWordSet{wordSetsDirectory}
 }
 
 // Load loads a word set from a file
-func (w *wordSet) Get(ID string) domain.WordSet {
+func (w *stopWordSet) Get(ID string) domain.WordSet {
 	wordSet := domain.WordSet{}
 	file, err := os.Open(filepath.Join(w.wordSetsDirectory, ID+wordSetFileSuffix))
 	if err != nil {
@@ -44,7 +44,7 @@ func (w *wordSet) Get(ID string) domain.WordSet {
 	return wordSet
 }
 
-func (w *wordSet) List() []string {
+func (w *stopWordSet) List() []string {
 	files, err := ioutil.ReadDir(w.wordSetsDirectory)
 	if err != nil {
 		panic(err)
