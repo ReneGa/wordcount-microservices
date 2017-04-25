@@ -8,7 +8,7 @@ import (
 
 // StopWordFilter is a service that filters stopwords from a stream of tweets
 type StopWordFilter interface {
-	TweetsWords(tweets domain.Tweets) domain.TweetsWords
+	TweetWords(tweets domain.Tweets) domain.TweetsWords
 }
 
 // NewStopWordFilter creates a new stop word filter service
@@ -20,7 +20,7 @@ type stopWordFilter struct {
 	repository repository.StopWordSet
 }
 
-func (s *stopWordFilter) TweetsWords(tweets domain.Tweets) domain.TweetsWords {
+func (s *stopWordFilter) TweetWords(tweets domain.Tweets) domain.TweetsWords {
 
 	stopWordSetIDs := s.repository.List()
 	languages := make([]language.Tag, len(stopWordSetIDs))
