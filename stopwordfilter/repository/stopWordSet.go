@@ -15,35 +15,35 @@ type StopWordSet interface {
 
 // NewStopWordSet creates a new StopWordSet repository
 func NewStopWordSet(datamapper datamapper.StopWordSet) StopWordSet {
-	return &wordSet{
+	return &stopWordSet{
 		cache:      map[string]domain.WordSet{},
 		datamapper: datamapper,
 	}
 }
 
-type wordSet struct {
+type stopWordSet struct {
 	sync.RWMutex
 	cache      map[string]domain.WordSet
 	datamapper datamapper.StopWordSet
 }
 
-func (w *wordSet) List() []string {
-	return w.datamapper.List()
+func (s *stopWordSet) List() []string {
+	return s.datamapper.List()
 }
 
-func (w *wordSet) Get(ID string) domain.WordSet {
-	w.RLock()
-	wordSet, ok := w.cache[ID]
-	w.RUnlock()
+func (s *stopWordSet) Get(ID string) domain.WordSet {
+	s.RLock()
+	stopWordSet, ok := s.cache[ID]
+	s.RUnlock()
 	if ok {
-		return wordSet
+		return stopWordSet
 	}
 
-	wordSet = w.datamapper.Get(ID)
+	stopWordSet = s.datamapper.Get(ID)
 
-	w.Lock()
-	w.cache[ID] = wordSet
-	w.Unlock()
+	s.Lock()
+	s.cache[ID] = stopWordSet
+	s.Unlock()
 
-	return wordSet
+	return stopWordSet
 }
