@@ -10,7 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// TweetWords is a resource serving tweets passed through a stopword filter
+// Tweets is a resource serving tweets passed through a stopword filter
 type Tweets struct {
 	Gateway gateway.Tweets
 	Service service.StopWordFilter
