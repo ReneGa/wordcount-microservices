@@ -19,16 +19,16 @@ type Tweets struct {
 // GET writes a stream of filtered tweets to the response
 func (t *Tweets) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
-	tweets := t.Gateway.Tweets(query)
-	filteredTweets := t.Service.Filter(tweets)
+
+	filteredTweets := t.Service.Filter(t.Gateway.Tweets(query))
 
 	go func() {
 		filteredTweets.Stop <- <-w.(http.CloseNotifier).CloseNotify()
 	}()
 
 	je := json.NewEncoder(w)
-	for tweetWords := range filteredTweets.Data {
-		je.Encode(tweetWords)
+	for tweet := range filteredTweets.Data {
+		je.Encode(tweet)
 		w.(http.Flusher).Flush()
 	}
 }

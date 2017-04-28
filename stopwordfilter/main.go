@@ -15,21 +15,20 @@ import (
 
 var address = flag.String("address", "localhost:8081", "Address to listen on")
 var tweetsURL = flag.String("tweetsURL", "http://localhost:8080/tweets", "URL of the tweet producer to connect to")
-var stopWordsDirectory = flag.String("stopWordsDirectory", "stopwords/", "Directory to load stopwords files from")
+var stopWordsDirectory = flag.String("stopWordsDirectory", "stopwords/", "Directory to load stopword files from")
 
 func main() {
 	flag.Parse()
 
-	wordSetDataMapper := datamapper.NewStopWordSet(*stopWordsDirectory)
-	wordSetRepository := repository.NewStopWordSet(wordSetDataMapper)
-	stopWordFilterService := service.NewStopWordFilter(wordSetRepository)
-	tweetsGateway := gateway.DefaultTweets{
+	stopWordSetDatamapper := datamapper.NewDirectoryStopWordSet(*stopWordsDirectory)
+	stopWordSetRepository := repository.StopWordSet(stopWordSetDatamapper)
+	stopWordFilterService := service.NewRepositoryBackedStopWordFilter(stopWordSetRepository)
+	tweetsGateway := gateway.HTTPTweets{
 		Client: http.DefaultClient,
 		URL:    *tweetsURL,
 	}
-
 	tweetsResource := resource.Tweets{
-		Gateway: tweetsGateway,
+		Gateway: &tweetsGateway,
 		Service: stopWordFilterService,
 	}
 

@@ -15,24 +15,31 @@ type Tweets interface {
 	Tweets(query string) domain.Tweets
 }
 
-// DefaultTweets is the gateway to get tweets
-type DefaultTweets struct {
+// HTTPTweets is the gateway to get tweets over http
+type HTTPTweets struct {
 	Client *http.Client
 	URL    string
 }
 
-func streamResponse(res *http.Response, data chan domain.Tweet, stop chan bool) bool {
+type decodeResult int
+
+const (
+	decodeError decodeResult = iota
+	decodeStopped
+)
+
+func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) decodeResult {
 	defer res.Body.Close()
 	var tweet domain.Tweet
 	jd := json.NewDecoder(res.Body)
 	for {
 		select {
 		case <-stop:
-			return false
+			return decodeStopped
 		default:
 			err := jd.Decode(&tweet)
 			if err != nil {
-				return true
+				return decodeError
 			}
 			data <- tweet
 		}
@@ -40,7 +47,7 @@ func streamResponse(res *http.Response, data chan domain.Tweet, stop chan bool) 
 }
 
 // Tweets return a stream of tweets for a given search query
-func (t *TweetsImpl) Tweets(query string) domain.Tweets {
+func (t *HTTPTweets) Tweets(query string) domain.Tweets {
 	url := fmt.Sprintf("%s?q=%s", t.URL, query)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -66,7 +73,8 @@ func (t *TweetsImpl) Tweets(query string) domain.Tweets {
 			}
 			res, err := t.Client.Do(req)
 			if err == nil {
-				reconnect = streamResponse(res, data, stop)
+				decodeResult := decodeResponse(res, data, stop)
+				reconnect = decodeResult == decodeError
 			} else {
 				log.Println("Error: ", err)
 			}

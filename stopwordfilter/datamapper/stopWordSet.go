@@ -13,25 +13,30 @@ import (
 
 const wordSetFileSuffix = ".txt"
 
-// StopWordSet is a stopword set datamapper
-type StopWordSet interface {
-	Get(ID string) domain.WordSet
-	List() []string
+// NewDirectoryStopWordSet creates DirectoryStopWordSet
+func NewDirectoryStopWordSet(wordSetsDirectory string) *DirectoryStopWordSet {
+	d := DirectoryStopWordSet{WordSetsDirectory: wordSetsDirectory}
+	d.wordSets = make(map[string]domain.WordSet)
+	for _, wordSetID := range d.List() {
+		d.wordSets[wordSetID] = d.load(wordSetID)
+	}
+	return &d
 }
 
-type stopWordSet struct {
-	wordSetsDirectory string
+// DirectoryStopWordSet reads stop words from the given directory
+type DirectoryStopWordSet struct {
+	WordSetsDirectory string
+	wordSets          map[string]domain.WordSet
 }
 
-// NewStopWordSet creates a new WordSet flat-file datamapper
-func NewStopWordSet(wordSetsDirectory string) StopWordSet {
-	return &stopWordSet{wordSetsDirectory}
+// Get loads a word set from a file
+func (d *DirectoryStopWordSet) Get(ID string) domain.WordSet {
+	return d.wordSets[ID]
 }
 
-// Load loads a word set from a file
-func (w *stopWordSet) Get(ID string) domain.WordSet {
+func (d *DirectoryStopWordSet) load(ID string) domain.WordSet {
 	wordSet := domain.WordSet{}
-	file, err := os.Open(filepath.Join(w.wordSetsDirectory, ID+wordSetFileSuffix))
+	file, err := os.Open(filepath.Join(d.WordSetsDirectory, ID+wordSetFileSuffix))
 	if err != nil {
 		panic(err)
 	}
@@ -44,8 +49,9 @@ func (w *stopWordSet) Get(ID string) domain.WordSet {
 	return wordSet
 }
 
-func (w *stopWordSet) List() []string {
-	files, err := ioutil.ReadDir(w.wordSetsDirectory)
+// List all available StopwordSets
+func (d *DirectoryStopWordSet) List() []string {
+	files, err := ioutil.ReadDir(d.WordSetsDirectory)
 	if err != nil {
 		panic(err)
 	}
