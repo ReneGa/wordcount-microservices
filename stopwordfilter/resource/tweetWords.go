@@ -11,23 +11,23 @@ import (
 )
 
 // TweetWords is a resource serving tweets passed through a stopword filter
-type TweetWords struct {
+type Tweets struct {
 	Gateway gateway.Tweets
 	Service service.StopWordFilter
 }
 
 // GET writes a stream of filtered tweets to the response
-func (t *TweetWords) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (t *Tweets) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
 	tweets := t.Gateway.Tweets(query)
-	filteredTweetWords := t.Service.TweetWords(tweets)
+	filteredTweets := t.Service.Filter(tweets)
 
 	go func() {
-		filteredTweetWords.Stop <- <-w.(http.CloseNotifier).CloseNotify()
+		filteredTweets.Stop <- <-w.(http.CloseNotifier).CloseNotify()
 	}()
 
 	je := json.NewEncoder(w)
-	for tweetWords := range filteredTweetWords.Data {
+	for tweetWords := range filteredTweets.Data {
 		je.Encode(tweetWords)
 		w.(http.Flusher).Flush()
 	}

@@ -24,13 +24,13 @@ func main() {
 	wordSetRepository := repository.NewStopWordSet(wordSetDataMapper)
 	stopWordFilterService := service.NewStopWordFilter(wordSetRepository)
 	tweetsGateway := gateway.NewTweets(http.DefaultClient, *tweetsURL)
-	tweetWordsResource := resource.TweetWords{
+	tweetsResource := resource.Tweets{
 		Gateway: tweetsGateway,
 		Service: stopWordFilterService,
 	}
 
 	router := httprouter.New()
-	router.GET("/tweetWords", tweetWordsResource.GET)
+	router.GET("/tweets", tweetsResource.GET)
 
 	done := make(chan bool)
 	go func() {

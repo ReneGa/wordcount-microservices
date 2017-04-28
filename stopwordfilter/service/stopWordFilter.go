@@ -8,7 +8,7 @@ import (
 
 // StopWordFilter is a service that filters stopwords from a stream of tweets
 type StopWordFilter interface {
-	TweetWords(tweets domain.Tweets) domain.TweetsWords
+	Filter(tweets domain.Tweets) domain.Tweets
 }
 
 // NewStopWordFilter creates a new stop word filter service
@@ -20,7 +20,7 @@ type stopWordFilter struct {
 	repository repository.StopWordSet
 }
 
-func (s *stopWordFilter) TweetWords(tweets domain.Tweets) domain.TweetsWords {
+func (s *stopWordFilter) Filter(tweets domain.Tweets) domain.Tweets {
 
 	stopWordSetIDs := s.repository.List()
 	languages := make([]language.Tag, len(stopWordSetIDs))
@@ -29,7 +29,7 @@ func (s *stopWordFilter) TweetWords(tweets domain.Tweets) domain.TweetsWords {
 	}
 	matcher := language.NewMatcher(languages)
 
-	data := make(chan domain.TweetWords)
+	data := make(chan domain.Tweet)
 	stop := make(chan bool)
 
 	go func() {
@@ -45,7 +45,7 @@ func (s *stopWordFilter) TweetWords(tweets domain.Tweets) domain.TweetsWords {
 		}
 	}()
 
-	return domain.TweetsWords{
+	return domain.Tweets{
 		Data: data,
 		Stop: stop,
 	}
