@@ -15,14 +15,10 @@ type Tweets interface {
 	Tweets(query string) domain.Tweets
 }
 
-// NewTweets creates a new gateway to a tweets producing service
-func NewTweets(client *http.Client, url string) Tweets {
-	return &tweets{client, url}
-}
-
-type tweets struct {
-	client *http.Client
-	url    string
+// DefaultTweets is the gateway to get tweets
+type DefaultTweets struct {
+	Client *http.Client
+	URL    string
 }
 
 func streamResponse(res *http.Response, data chan domain.Tweet, stop chan bool) bool {
@@ -43,8 +39,9 @@ func streamResponse(res *http.Response, data chan domain.Tweet, stop chan bool) 
 	}
 }
 
-func (t *tweets) Tweets(query string) domain.Tweets {
-	url := fmt.Sprintf("%s?q=%s", t.url, query)
+// Tweets return a stream of tweets for a given search query
+func (t *TweetsImpl) Tweets(query string) domain.Tweets {
+	url := fmt.Sprintf("%s?q=%s", t.URL, query)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
@@ -67,7 +64,7 @@ func (t *tweets) Tweets(query string) domain.Tweets {
 				return
 			default:
 			}
-			res, err := t.client.Do(req)
+			res, err := t.Client.Do(req)
 			if err == nil {
 				reconnect = streamResponse(res, data, stop)
 			} else {

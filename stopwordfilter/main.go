@@ -23,7 +23,11 @@ func main() {
 	wordSetDataMapper := datamapper.NewStopWordSet(*stopWordsDirectory)
 	wordSetRepository := repository.NewStopWordSet(wordSetDataMapper)
 	stopWordFilterService := service.NewStopWordFilter(wordSetRepository)
-	tweetsGateway := gateway.NewTweets(http.DefaultClient, *tweetsURL)
+	tweetsGateway := gateway.DefaultTweets{
+		Client: http.DefaultClient,
+		URL:    *tweetsURL,
+	}
+
 	tweetsResource := resource.Tweets{
 		Gateway: tweetsGateway,
 		Service: stopWordFilterService,
