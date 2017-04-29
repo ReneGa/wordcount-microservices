@@ -18,8 +18,9 @@ func removeWords(wordsToRemove WordSet, words []string) []string {
 func FilterStopWords(stopWords WordSet, tweet Tweet) Tweet {
 	words := strings.Split(tweet.Text, " ")
 	return Tweet{
-		Text: strings.Join(removeWords(stopWords, words), " "),
-		ID:   tweet.ID,
-		Time: tweet.Time,
+		Text:     strings.Join(removeWords(stopWords, words), " "),
+		ID:       tweet.ID,
+		Time:     tweet.Time,
+		Language: tweet.Language,
 	}
 }
