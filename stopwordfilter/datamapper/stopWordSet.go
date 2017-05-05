@@ -17,7 +17,7 @@ const wordSetFileSuffix = ".txt"
 func NewDirectoryStopWordSet(wordSetsDirectory string) *DirectoryStopWordSet {
 	d := DirectoryStopWordSet{WordSetsDirectory: wordSetsDirectory}
 	d.wordSets = make(map[string]domain.WordSet)
-	for _, wordSetID := range d.List() {
+	for _, wordSetID := range d.listFilesOnDisk() {
 		d.wordSets[wordSetID] = d.load(wordSetID)
 	}
 	return &d
@@ -51,6 +51,16 @@ func (d *DirectoryStopWordSet) load(ID string) domain.WordSet {
 
 // List all available StopwordSets
 func (d *DirectoryStopWordSet) List() []string {
+	wordSetIDs := make([]string, len(d.wordSets))
+	i := 0
+	for wordSetID := range d.wordSets {
+		wordSetIDs[i] = wordSetID
+		i++
+	}
+	return wordSetIDs
+}
+
+func (d *DirectoryStopWordSet) listFilesOnDisk() []string {
 	files, err := ioutil.ReadDir(d.WordSetsDirectory)
 	if err != nil {
 		panic(err)
