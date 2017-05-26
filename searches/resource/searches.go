@@ -8,23 +8,24 @@ import (
 	"strconv"
 
 	"github.com/ReneGa/tweetcount-microservices/searches/domain"
+	"github.com/ReneGa/tweetcount-microservices/searches/repository"
 	"github.com/julienschmidt/httprouter"
 )
 
-// Search is a resource serving window Search
-type Search struct {
+// Searches is a resource serving window Search
+type Searches struct {
 	SearchesRepository *repository.Searches
 }
 
 // GetAll retrieves all persisted searches
-func (s *Search) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	searches := s.SearchesRepository.GetAll()
+func (s *Searches) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	searches, _ := s.SearchesRepository.GetAll()
 	je := json.NewEncoder(w)
 	je.Encode(searches)
 }
 
 // Post creates a new search
-func (s *Search) Post(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (s *Searches) Post(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
 	seconds, err := strconv.Atoi(r.URL.Query().Get("seconds"))
 	if err != nil {
@@ -36,7 +37,13 @@ func (s *Search) Post(w http.ResponseWriter, r *http.Request, p httprouter.Param
 		Query:               query,
 		WindowLengthSeconds: seconds,
 	}
-	search := s.SearchesRepository.Save(newSearch)
+	search, err := s.SearchesRepository.Save(&newSearch)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+
 	je := json.NewEncoder(w)
 	je.Encode(search)
 }
