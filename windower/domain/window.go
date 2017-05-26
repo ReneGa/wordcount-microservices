@@ -36,7 +36,13 @@ func (w *Window) Dequeue() {
 	tweetWordCount := w.tweetWordCounts[0]
 	w.tweetWordCounts = w.tweetWordCounts[1:]
 	for word, count := range tweetWordCount.WordCount {
-		w.Totals[word] -= count
+		total := w.Totals[word]
+		newTotal := total - count
+		if newTotal == 0 {
+			delete(w.Totals, word)
+		} else {
+			w.Totals[word] = newTotal
+		}
 	}
 }
 
