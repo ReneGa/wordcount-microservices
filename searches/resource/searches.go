@@ -24,8 +24,8 @@ func (s *Searches) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.P
 	je.Encode(searches)
 }
 
-// Post creates a new search
-func (s *Searches) Post(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+// Create creates a new search
+func (s *Searches) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
 	seconds, err := strconv.Atoi(r.URL.Query().Get("seconds"))
 	if err != nil {
