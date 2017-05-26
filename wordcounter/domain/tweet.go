@@ -11,11 +11,16 @@ type Tweet struct {
 	Time     time.Time
 }
 
+const cutset = ",.:;-_!?()[]{}…\"\n\t'"
+
 func (t Tweet) WordCount() TweetWordCount {
 	words := strings.Split(t.Text, " ")
 	wordCount := WordCount{}
 	for _, word := range words {
-		wordCount[word]++
+		word = strings.Trim(word, cutset)
+		if word != "" {
+			wordCount[word]++
+		}
 	}
 	return TweetWordCount{
 		WordCount:     wordCount,
