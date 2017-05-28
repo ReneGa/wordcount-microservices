@@ -27,6 +27,8 @@ func main() {
 		DB: db,
 	}
 
+	searchesRepo.Init()
+
 	searchesResource := resource.Searches{
 		SearchesRepository: &searchesRepo,
 	}

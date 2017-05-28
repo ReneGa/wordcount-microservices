@@ -19,6 +19,16 @@ type Searches struct {
 	DB *sql.DB
 }
 
+func (s *Searches) Init() error {
+	_, err := s.DB.Exec(`
+	create table if not exists searches (
+		id integer not null primary key,
+		query text not null,
+		windowSeconds integer not null
+	);`)
+	return err
+}
+
 func (s *Searches) Get(ID string) (*domain.Search, error) {
 	var IDfromDB int64
 	var Query string
