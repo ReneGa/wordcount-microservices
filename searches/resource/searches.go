@@ -19,6 +19,11 @@ type Searches struct {
 
 func (s *Searches) Get(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	searches, err := s.SearchesRepository.Get(p.ByName("searchID"))
+	if err == repository.ErrSearchNotFound {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte(http.StatusText(http.StatusNotFound)))
+		return
+	}
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))

@@ -2,12 +2,17 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/ReneGa/tweetcount-microservices/searches/domain"
 
 	// blank import
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// ErrSearchNotFound is returned by Get when no search
+// with the given ID is found
+var ErrSearchNotFound = errors.New("search not found")
 
 // Searches is the repository for Searches
 type Searches struct {
@@ -19,6 +24,9 @@ func (s *Searches) Get(ID string) (*domain.Search, error) {
 	var Query string
 	var WindowLengthSeconds int
 	err := s.DB.QueryRow("select id, query, windowSeconds from searches where id = ?", ID).Scan(&IDfromDB, &Query, &WindowLengthSeconds)
+	if err == sql.ErrNoRows {
+		return nil, ErrSearchNotFound
+	}
 	if err != nil {
 		return nil, err
 	}
