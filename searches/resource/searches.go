@@ -17,9 +17,25 @@ type Searches struct {
 	SearchesRepository *repository.Searches
 }
 
+func (s *Searches) Get(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	searches, err := s.SearchesRepository.Get(p.ByName("searchID"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+	je := json.NewEncoder(w)
+	je.Encode(searches)
+}
+
 // GetAll retrieves all persisted searches
 func (s *Searches) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	searches, _ := s.SearchesRepository.GetAll()
+	searches, err := s.SearchesRepository.GetAll()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
 	je := json.NewEncoder(w)
 	je.Encode(searches)
 }
