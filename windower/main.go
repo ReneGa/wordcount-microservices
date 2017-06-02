@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ReneGa/tweetcount-microservices/windower/domain"
 	"github.com/ReneGa/tweetcount-microservices/windower/gateway"
 	"github.com/ReneGa/tweetcount-microservices/windower/resource"
 	"github.com/ReneGa/tweetcount-microservices/windower/service"
@@ -14,6 +13,7 @@ import (
 
 var address = flag.String("address", "localhost:8083", "Address to listen on")
 var wordCountsURL = flag.String("wordCountsURL", "http://localhost:8082/wordcounts", "URL of the word counter to connect to")
+var searchesURL = flag.String("searchesURL", "http://localhost:8084/searches", "URL of the searches service to connect to")
 
 func main() {
 	flag.Parse()
@@ -22,11 +22,9 @@ func main() {
 		Client: http.DefaultClient,
 		URL:    *wordCountsURL,
 	}
-	searchesService := &gateway.FixedSearches{
-		domain.Search{
-			Query:               "dog",
-			WindowLengthSeconds: 30,
-		},
+	searchesService := &gateway.HTTPSearches{
+		Client: http.DefaultClient,
+		URL:    *searchesURL,
 	}
 	windowService := service.NewWindow(tweetWordCountsGateway, searchesService)
 	totalsResource := resource.Totals{

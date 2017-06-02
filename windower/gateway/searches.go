@@ -1,18 +1,34 @@
 package gateway
 
-import "github.com/ReneGa/tweetcount-microservices/windower/domain"
+import (
+	"fmt"
+	"net/http"
+
+	"encoding/json"
+
+	"github.com/ReneGa/tweetcount-microservices/windower/domain"
+)
 
 type Searches interface {
 	ForID(ID string) domain.Search
 }
 
-type FixedSearches struct {
-	domain.Search
+type HTTPSearches struct {
+	Client *http.Client
+	URL    string
 }
 
-func (f *FixedSearches) ForID(ID string) domain.Search {
-	return domain.Search{
-		Query:               f.Query,
-		WindowLengthSeconds: f.WindowLengthSeconds,
+func (s *HTTPSearches) ForID(ID string) domain.Search {
+	url := fmt.Sprintf("%s/%s", s.URL, ID)
+	res, err := s.Client.Get(url)
+	if err != nil {
+		panic(err)
 	}
+	jd := json.NewDecoder(res.Body)
+	var search domain.Search
+	err = jd.Decode(&search)
+	if err != nil {
+		panic(err)
+	}
+	return search
 }
