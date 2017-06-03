@@ -26,7 +26,7 @@ func NewWindow(
 	}
 }
 
-func (w *Window) Totals(searchID string) domain.WordCount {
+func (w *Window) Totals(searchID string) (domain.WordCount, error) {
 	w.Lock()
 	window, ok := w.forSearch[searchID]
 	w.Unlock()
@@ -37,11 +37,14 @@ func (w *Window) Totals(searchID string) domain.WordCount {
 		for word, count := range window.Totals {
 			totals[word] = count
 		}
-		return totals
+		return totals, nil
 	}
 
 	// Fetch search from searches service
-	search := w.searchesGateway.ForID(searchID)
+	search, err := w.searchesGateway.ForID(searchID)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create new window
 	window = domain.NewWindow(search.WindowLengthSeconds, 16384) // TODO: Read from config
@@ -61,5 +64,5 @@ func (w *Window) Totals(searchID string) domain.WordCount {
 		}
 	}()
 
-	return domain.WordCount{}
+	return domain.WordCount{}, nil
 }

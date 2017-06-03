@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,29 +10,38 @@ import (
 	"github.com/ReneGa/tweetcount-microservices/windower/domain"
 )
 
+// Searches is a gateway to a Search service
 type Searches interface {
-	ForID(ID string) domain.Search
+	ForID(ID string) (*domain.Search, error)
 }
 
+// HTTPSearches is a gateway to a HTTP Search service
 type HTTPSearches struct {
 	Client *http.Client
 	URL    string
 }
 
-func (s *HTTPSearches) ForID(ID string) domain.Search {
+// ErrSearchNotFound is the error indicating that the given search was not found
+var ErrSearchNotFound = errors.New("search not found")
+
+// ForID returns the search for the given ID
+func (s *HTTPSearches) ForID(ID string) (*domain.Search, error) {
 	url := fmt.Sprintf("%s/%s", s.URL, ID)
 	res, err := s.Client.Get(url)
 	if err != nil {
-		panic(err)
+		return nil, err
+	}
+	if res.StatusCode == http.StatusNotFound {
+		return nil, ErrSearchNotFound
 	}
 	if res.StatusCode != http.StatusOK {
-		panic(fmt.Sprintf("searches: unexpected response status code %d", res.StatusCode))
+		return nil, fmt.Errorf("searches: unexpected response status code %d", res.StatusCode)
 	}
 	jd := json.NewDecoder(res.Body)
 	var search domain.Search
 	err = jd.Decode(&search)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return search
+	return &search, nil
 }

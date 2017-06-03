@@ -17,7 +17,12 @@ type Totals struct {
 // GET writes the current window state to the response
 func (t *Totals) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	searchID := p.ByName("searchID")
-	totals := t.Service.Totals(searchID)
+	totals, err := t.Service.Totals(searchID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
 	je := json.NewEncoder(w)
 	je.Encode(totals)
 }
