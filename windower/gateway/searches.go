@@ -24,6 +24,9 @@ func (s *HTTPSearches) ForID(ID string) domain.Search {
 	if err != nil {
 		panic(err)
 	}
+	if res.StatusCode != http.StatusOK {
+		panic(fmt.Sprintf("searches: unexpected response status code %d", res.StatusCode))
+	}
 	jd := json.NewDecoder(res.Body)
 	var search domain.Search
 	err = jd.Decode(&search)
