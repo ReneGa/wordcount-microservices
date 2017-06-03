@@ -9,7 +9,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/ReneGa/tweetcount-microservices/searches/repository"
+	"github.com/ReneGa/tweetcount-microservices/searches/datamapper"
 	"github.com/ReneGa/tweetcount-microservices/searches/resource"
 	"github.com/julienschmidt/httprouter"
 )
@@ -23,14 +23,14 @@ func main() {
 	}
 	defer db.Close()
 
-	searchesRepo := repository.Searches{
+	searchesDataMapper := datamapper.Searches{
 		DB: db,
 	}
 
-	searchesRepo.Init()
+	searchesDataMapper.Init()
 
 	searchesResource := resource.Searches{
-		SearchesRepository: &searchesRepo,
+		SearchesDataMapper: &searchesDataMapper,
 	}
 
 	router := httprouter.New()

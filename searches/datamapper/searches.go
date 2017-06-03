@@ -1,4 +1,4 @@
-package repository
+package datamapper
 
 import (
 	"database/sql"

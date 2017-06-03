@@ -7,19 +7,19 @@ import (
 
 	"strconv"
 
+	"github.com/ReneGa/tweetcount-microservices/searches/datamapper"
 	"github.com/ReneGa/tweetcount-microservices/searches/domain"
-	"github.com/ReneGa/tweetcount-microservices/searches/repository"
 	"github.com/julienschmidt/httprouter"
 )
 
 // Searches is a resource serving window Search
 type Searches struct {
-	SearchesRepository *repository.Searches
+	SearchesDataMapper *datamapper.Searches
 }
 
 func (s *Searches) Get(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	searches, err := s.SearchesRepository.Get(p.ByName("searchID"))
-	if err == repository.ErrSearchNotFound {
+	searches, err := s.SearchesDataMapper.Get(p.ByName("searchID"))
+	if err == datamapper.ErrSearchNotFound {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(http.StatusText(http.StatusNotFound)))
 		return
@@ -35,7 +35,7 @@ func (s *Searches) Get(w http.ResponseWriter, r *http.Request, p httprouter.Para
 
 // GetAll retrieves all persisted searches
 func (s *Searches) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	searches, err := s.SearchesRepository.GetAll()
+	searches, err := s.SearchesDataMapper.GetAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
@@ -58,7 +58,7 @@ func (s *Searches) Create(w http.ResponseWriter, r *http.Request, p httprouter.P
 		Query:               query,
 		WindowLengthSeconds: seconds,
 	}
-	search, err := s.SearchesRepository.Save(&newSearch)
+	search, err := s.SearchesDataMapper.Save(&newSearch)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
