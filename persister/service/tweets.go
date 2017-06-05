@@ -1,6 +1,7 @@
 package service
 
 import (
+	"sync"
 	"time"
 
 	"github.com/ReneGa/tweetcount-microservices/persister/datamapper"
@@ -9,8 +10,10 @@ import (
 )
 
 type Tweets struct {
-	DataMapper *datamapper.Queries
-	Gateway    gateway.Tweets
+	sync.Mutex
+	DataMapper              *datamapper.Queries
+	historyWriterRegistered map[string]bool
+	Gateway                 gateway.Tweets
 }
 
 func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
@@ -19,17 +22,29 @@ func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
 	}
 }
 
+func (t *Tweets) registerHistoryWriter(query string) bool {
+	t.Lock()
+	if t.historyWriterRegistered == nil {
+		t.historyWriterRegistered = map[string]bool{}
+	}
+	alreadyRegistered := t.historyWriterRegistered[query]
+	t.historyWriterRegistered[query] = true
+	t.Unlock()
+	return !alreadyRegistered
+}
+
+func (t *Tweets) unRegisterHistoryWriter(query string) {
+	t.Lock()
+	t.historyWriterRegistered[query] = true
+	t.Unlock()
+}
+
 func (t *Tweets) streamFreshTweets(history datamapper.Tweets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
 	defer close(out)
-	writeHistory := false
-	if history.RegisterWriter() {
-		defer history.UnregisterWriter()
-		writeHistory = true
-	}
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
-			if writeHistory {
+			if history != nil {
 				history.Append(tweet, time.Now())
 			}
 			out <- tweet
@@ -53,6 +68,11 @@ func (t *Tweets) Tweets(query string, startTime time.Time) domain.Tweets {
 	go replayHistory.ReplayFrom(startTime, replayTweets)
 	go func() {
 		copyTweets(replayTweets, out)
+		if !t.registerHistoryWriter(query) {
+			replayHistory = nil
+		} else {
+			defer t.unRegisterHistoryWriter(query)
+		}
 		t.streamFreshTweets(replayHistory, freshTweets, out, stop)
 	}()
 	return tweets

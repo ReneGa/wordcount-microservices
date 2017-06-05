@@ -19,8 +19,9 @@ type Tweets struct {
 // GET writes a stream of filtered tweets to the response
 func (t *Tweets) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
+	offset := r.URL.Query().Get("t")
 
-	filteredTweets := t.Service.Filter(t.Gateway.Tweets(query))
+	filteredTweets := t.Service.Filter(t.Gateway.Tweets(query, offset))
 
 	go func() {
 		filteredTweets.Stop <- <-w.(http.CloseNotifier).CloseNotify()

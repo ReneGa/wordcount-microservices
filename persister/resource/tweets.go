@@ -18,15 +18,15 @@ type Tweets struct {
 // GET streams tweets from Twitter for a given search query
 func (t *Tweets) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
-	startTimeOffsetString := r.URL.Query().Get("t")
+	offsetString := r.URL.Query().Get("t")
 
 	// parse start time offset
-	startTimeOffset, err := time.ParseDuration(startTimeOffsetString)
+	offset, err := time.ParseDuration(offsetString)
 
 	// if given, subtract start time offset from `now`
 	startTime := time.Now()
 	if err == nil {
-		startTime = startTime.Add(-startTimeOffset)
+		startTime = startTime.Add(-offset)
 	}
 
 	// open tweets stream
