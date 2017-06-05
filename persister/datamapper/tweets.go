@@ -2,6 +2,7 @@ package datamapper
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -52,7 +53,7 @@ func (t *TweetBuckets) bucketForTweet(tweet domain.Tweet, now time.Time) bucketI
 }
 
 func (t *TweetBuckets) bucketForTime(now time.Time) bucketID {
-	return bucketID(now.Round(t.BucketDuration).Format(time.RFC3339))
+	return bucketID(fmt.Sprintf("%d", now.Round(t.BucketDuration).Unix()))
 }
 func (t *TweetBuckets) bucketFileName(bucket bucketID) string {
 	return path.Join(t.Directory, string(bucket))
