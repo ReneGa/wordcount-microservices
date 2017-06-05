@@ -8,23 +8,51 @@ import (
 	"path"
 	"time"
 
+	"sync"
+
 	"github.com/ReneGa/tweetcount-microservices/persister/domain"
 )
 
+type Tweets interface {
+	RegisterWriter() bool
+	UnregisterWriter() bool
+	Append(tweet domain.Tweet, now time.Time)
+	ReplayFrom(now time.Time, out chan domain.Tweet) error
+}
+
 type TweetBuckets struct {
-	Directory string
+	sync.Mutex
+	Directory        string
+	BucketDuration   time.Duration
+	WriterRegistered bool
 }
 
 type bucketID string
 
 const bucketFileMode = 0666
 
+func (t *TweetBuckets) RegisterWriter() bool {
+	t.Lock()
+	writerRegistered := t.WriterRegistered
+	t.WriterRegistered = true
+	t.Unlock()
+	return !writerRegistered
+}
+
+func (t *TweetBuckets) UnregisterWriter() bool {
+	t.Lock()
+	writerRegistered := t.WriterRegistered
+	t.WriterRegistered = false
+	t.Unlock()
+	return writerRegistered
+}
+
 func (t *TweetBuckets) bucketForTweet(tweet domain.Tweet, now time.Time) bucketID {
 	return t.bucketForTime(now)
 }
 
 func (t *TweetBuckets) bucketForTime(now time.Time) bucketID {
-	return bucketID(now.Round(time.Hour).Format(time.RFC3339))
+	return bucketID(now.Round(t.BucketDuration).Format(time.RFC3339))
 }
 func (t *TweetBuckets) bucketFileName(bucket bucketID) string {
 	return path.Join(t.Directory, string(bucket))

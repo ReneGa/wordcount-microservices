@@ -19,12 +19,19 @@ func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
 	}
 }
 
-func (t *Tweets) streamFreshTweets(history datamapper.TweetBuckets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
+func (t *Tweets) streamFreshTweets(history datamapper.Tweets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
 	defer close(out)
+	writeHistory := false
+	if history.RegisterWriter() {
+		defer history.UnregisterWriter()
+		writeHistory = true
+	}
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
-			history.Append(tweet, time.Now())
+			if writeHistory {
+				history.Append(tweet, time.Now())
+			}
 			out <- tweet
 		case <-stop:
 			freshTweets.Stop <- true

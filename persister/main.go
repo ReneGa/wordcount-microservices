@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ReneGa/tweetcount-microservices/persister/datamapper"
 	"github.com/ReneGa/tweetcount-microservices/persister/gateway"
@@ -14,13 +15,16 @@ import (
 
 var address = flag.String("address", "localhost:8085", "Address to listen on")
 var bucketsDirectory = flag.String("bucketsDirectory", "./buckets", "Directory to write tweet buckets to.")
+var bucketDuration = flag.Duration("bucketDuration", time.Hour, "Duration of a tweet bucket.")
+
 var tweetsURL = flag.String("tweetsURL", "http://localhost:8080/tweets", "URL of the tweet producer to connect to")
 
 func main() {
 	flag.Parse()
 
 	queriesDataMapper := &datamapper.Queries{
-		Directory: *bucketsDirectory,
+		Directory:      *bucketsDirectory,
+		BucketDuration: *bucketDuration,
 	}
 	tweetsGateway := &gateway.HTTPTweets{
 		Client: http.DefaultClient,
