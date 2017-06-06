@@ -11,9 +11,9 @@ import (
 
 type Tweets struct {
 	sync.Mutex
-	DataMapper              *datamapper.Queries
-	historyWriterRegistered map[string]bool
-	Gateway                 gateway.Tweets
+	DataMapper       *datamapper.Queries
+	Gateway          gateway.Tweets
+	writerRegistered map[string]bool
 }
 
 func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
@@ -22,20 +22,20 @@ func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
 	}
 }
 
-func (t *Tweets) registerHistoryWriter(query string) bool {
+func (t *Tweets) registerWriter(query string) bool {
 	t.Lock()
-	if t.historyWriterRegistered == nil {
-		t.historyWriterRegistered = map[string]bool{}
+	if t.writerRegistered == nil {
+		t.writerRegistered = map[string]bool{}
 	}
-	alreadyRegistered := t.historyWriterRegistered[query]
-	t.historyWriterRegistered[query] = true
+	alreadyRegistered := t.writerRegistered[query]
+	t.writerRegistered[query] = true
 	t.Unlock()
 	return !alreadyRegistered
 }
 
-func (t *Tweets) unRegisterHistoryWriter(query string) {
+func (t *Tweets) unregisterWriter(query string) {
 	t.Lock()
-	t.historyWriterRegistered[query] = true
+	t.writerRegistered[query] = false
 	t.Unlock()
 }
 
@@ -62,18 +62,18 @@ func (t *Tweets) Tweets(query string, startTime time.Time) domain.Tweets {
 		Data: out,
 		Stop: stop,
 	}
-	replayTweets := make(chan domain.Tweet)
 	freshTweets := t.Gateway.Tweets(query)
-	replayHistory := t.DataMapper.Get(query)
-	go replayHistory.ReplayFrom(startTime, replayTweets)
+	replayTweets := make(chan domain.Tweet)
+	history := t.DataMapper.Get(query)
+	go history.ReplayFrom(startTime, replayTweets)
 	go func() {
 		copyTweets(replayTweets, out)
-		if !t.registerHistoryWriter(query) {
-			replayHistory = nil
+		if !t.registerWriter(query) {
+			history = nil
 		} else {
-			defer t.unRegisterHistoryWriter(query)
+			defer t.unregisterWriter(query)
 		}
-		t.streamFreshTweets(replayHistory, freshTweets, out, stop)
+		t.streamFreshTweets(history, freshTweets, out, stop)
 	}()
 	return tweets
 }

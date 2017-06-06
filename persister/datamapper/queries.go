@@ -3,10 +3,12 @@ package datamapper
 import (
 	"os"
 	"path"
+	"sync"
 	"time"
 )
 
 type Queries struct {
+	sync.Mutex
 	Directory      string
 	BucketDuration time.Duration
 	Buckets        map[string]Tweets
@@ -30,6 +32,8 @@ func (q *Queries) createBuckets(query string) Tweets {
 }
 
 func (q *Queries) Get(query string) Tweets {
+	q.Lock()
+	defer q.Unlock()
 	q.initBuckets()
 	if buckets, ok := q.Buckets[query]; ok {
 		return buckets
