@@ -6,7 +6,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/ReneGa/tweetcount-microservices/persister/service"
+	"github.com/ReneGa/tweetcount-microservices/recorder/service"
 	"github.com/julienschmidt/httprouter"
 )
 

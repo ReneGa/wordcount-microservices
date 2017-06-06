@@ -9,7 +9,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/ReneGa/tweetcount-microservices/persister/domain"
+	"github.com/ReneGa/tweetcount-microservices/recorder/domain"
 )
 
 type Tweets interface {

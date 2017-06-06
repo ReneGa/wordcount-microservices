@@ -7,7 +7,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/ReneGa/tweetcount-microservices/persister/domain"
+	"github.com/ReneGa/tweetcount-microservices/recorder/domain"
 )
 
 // Tweets is a gateway to a tweet producing service

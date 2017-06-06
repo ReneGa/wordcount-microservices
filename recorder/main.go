@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ReneGa/tweetcount-microservices/persister/datamapper"
-	"github.com/ReneGa/tweetcount-microservices/persister/gateway"
-	"github.com/ReneGa/tweetcount-microservices/persister/resource"
-	"github.com/ReneGa/tweetcount-microservices/persister/service"
+	"github.com/ReneGa/tweetcount-microservices/recorder/datamapper"
+	"github.com/ReneGa/tweetcount-microservices/recorder/gateway"
+	"github.com/ReneGa/tweetcount-microservices/recorder/resource"
+	"github.com/ReneGa/tweetcount-microservices/recorder/service"
 	"github.com/julienschmidt/httprouter"
 )
 
