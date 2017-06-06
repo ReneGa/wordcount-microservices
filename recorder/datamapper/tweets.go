@@ -26,12 +26,13 @@ type bucketID string
 
 const bucketFileMode = 0666
 
-func (t *TweetBuckets) bucketForTweet(tweet domain.Tweet, now time.Time) bucketID {
-	return t.bucketForTime(now)
+func (t *TweetBuckets) bucketForTweet(tweet domain.Tweet) bucketID {
+	return t.bucketForTime(tweet.Time)
 }
 
 func (t *TweetBuckets) bucketForTime(now time.Time) bucketID {
 	return bucketID(fmt.Sprintf("%d", now.Round(t.BucketDuration).Unix()))
+
 }
 func (t *TweetBuckets) bucketFileName(bucket bucketID) string {
 	return path.Join(t.Directory, string(bucket))
@@ -49,7 +50,7 @@ func (t *TweetBuckets) listBucketsAfter(startBucket bucketID) []bucketID {
 	return bucketIDs
 }
 
-func (t *TweetBuckets) appendToBucket(tweet domain.Tweet, now time.Time, bucket bucketID) error {
+func (t *TweetBuckets) appendToBucket(bucket bucketID, tweet domain.Tweet) error {
 	bucketFileName := t.bucketFileName(bucket)
 	f, err := os.OpenFile(bucketFileName, os.O_RDWR|os.O_APPEND|os.O_CREATE, bucketFileMode)
 	if err != nil {
@@ -60,7 +61,7 @@ func (t *TweetBuckets) appendToBucket(tweet domain.Tweet, now time.Time, bucket 
 	return je.Encode(tweet)
 }
 
-func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, bucketTime time.Time, out chan domain.Tweet) error {
+func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, startTime time.Time, out chan domain.Tweet) error {
 	defer close(out)
 	buckets := t.listBucketsAfter(startBucket)
 	for _, bucket := range buckets {
@@ -79,7 +80,7 @@ func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, bucketTime t
 			if err != nil {
 				panic(err)
 			}
-			if tweet.Time.After(bucketTime) {
+			if tweet.Time.After(startTime) {
 				out <- tweet
 			}
 		}
@@ -88,11 +89,11 @@ func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, bucketTime t
 }
 
 func (t *TweetBuckets) Append(tweet domain.Tweet, now time.Time) {
-	bucket := t.bucketForTweet(tweet, now)
-	t.appendToBucket(tweet, now, bucket)
+	bucket := t.bucketForTweet(tweet)
+	t.appendToBucket(bucket, tweet)
 }
 
-func (t *TweetBuckets) ReplayFrom(bucketTime time.Time, out chan domain.Tweet) error {
-	bucket := t.bucketForTime(bucketTime)
-	return t.readStartingFromBucket(bucket, bucketTime, out)
+func (t *TweetBuckets) ReplayFrom(startTime time.Time, out chan domain.Tweet) error {
+	bucket := t.bucketForTime(startTime)
+	return t.readStartingFromBucket(bucket, startTime, out)
 }
