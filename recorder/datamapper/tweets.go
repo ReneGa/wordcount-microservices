@@ -13,7 +13,7 @@ import (
 )
 
 type Tweets interface {
-	Append(tweet domain.Tweet, now time.Time)
+	Append(tweet domain.Tweet)
 	ReplayFrom(now time.Time, out chan domain.Tweet) error
 }
 
@@ -31,7 +31,7 @@ func (t *TweetBuckets) bucketForTweet(tweet domain.Tweet) bucketID {
 }
 
 func (t *TweetBuckets) bucketForTime(now time.Time) bucketID {
-	return bucketID(fmt.Sprintf("%d", now.Round(t.BucketDuration).Unix()))
+	return bucketID(fmt.Sprintf("%d", uint64(now.Round(t.BucketDuration).Unix())))
 
 }
 func (t *TweetBuckets) bucketFileName(bucket bucketID) string {
@@ -96,7 +96,7 @@ func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, startTime ti
 	return nil
 }
 
-func (t *TweetBuckets) Append(tweet domain.Tweet, now time.Time) {
+func (t *TweetBuckets) Append(tweet domain.Tweet) {
 	bucket := t.bucketForTweet(tweet)
 	t.appendToBucket(bucket, tweet)
 }
