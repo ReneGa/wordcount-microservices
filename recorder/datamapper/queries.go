@@ -14,6 +14,8 @@ type Queries struct {
 	Buckets        map[string]Tweets
 }
 
+const bucketsDirectoryMode = 0777
+
 func (q *Queries) initBuckets() {
 	if q.Buckets == nil {
 		q.Buckets = map[string]Tweets{}
@@ -22,7 +24,8 @@ func (q *Queries) initBuckets() {
 
 func (q *Queries) createBuckets(query string) Tweets {
 	bucketsDirectory := path.Join(q.Directory, query)
-	os.MkdirAll(bucketsDirectory, 0777)
+	os.MkdirAll(bucketsDirectory, bucketsDirectoryMode)
+
 	buckets := &TweetBuckets{
 		Directory:      bucketsDirectory,
 		BucketDuration: q.BucketDuration,
@@ -34,6 +37,7 @@ func (q *Queries) createBuckets(query string) Tweets {
 func (q *Queries) Get(query string) Tweets {
 	q.Lock()
 	defer q.Unlock()
+
 	q.initBuckets()
 	if buckets, ok := q.Buckets[query]; ok {
 		return buckets
