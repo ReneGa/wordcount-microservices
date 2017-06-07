@@ -41,7 +41,11 @@ func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) 
 			if err != nil {
 				return decodeError
 			}
-			data <- tweet
+			select {
+			case data <- tweet:
+			case <-stop:
+				return decodeStopped
+			}
 		}
 	}
 }
