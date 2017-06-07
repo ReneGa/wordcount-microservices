@@ -40,7 +40,6 @@ func (t *Tweets) unregisterWriter(query string) {
 }
 
 func (t *Tweets) streamFreshTweets(freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
-	defer close(out)
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
@@ -53,11 +52,10 @@ func (t *Tweets) streamFreshTweets(freshTweets domain.Tweets, out chan domain.Tw
 }
 
 func (t *Tweets) streamAndRecordFreshTweets(history datamapper.Tweets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
-	defer close(out)
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
-			history.Append(tweet, time.Now())
+			history.Append(tweet)
 			out <- tweet
 		case <-stop:
 			freshTweets.Stop <- true
@@ -78,12 +76,13 @@ func (t *Tweets) Tweets(query string, startTime time.Time) domain.Tweets {
 	history := t.DataMapper.Get(query)
 	go history.ReplayFrom(startTime, replayTweets)
 	go func() {
+		defer close(out)
 		copyTweets(replayTweets, out)
 		if !t.registerWriter(query) {
 			t.streamFreshTweets(freshTweets, out, stop)
 		} else {
-			defer t.unregisterWriter(query)
 			t.streamAndRecordFreshTweets(history, freshTweets, out, stop)
+			t.unregisterWriter(query)
 		}
 	}()
 	return tweets
