@@ -30,18 +30,22 @@ const (
 
 func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) decodeResult {
 	defer res.Body.Close()
-	var tweet domain.Tweet
 	jd := json.NewDecoder(res.Body)
 	for {
 		select {
 		case <-stop:
 			return decodeStopped
 		default:
+			var tweet domain.Tweet
 			err := jd.Decode(&tweet)
 			if err != nil {
 				return decodeError
 			}
-			data <- tweet
+			select {
+			case data <- tweet:
+			case <-stop:
+				return decodeStopped
+			}
 		}
 	}
 }
