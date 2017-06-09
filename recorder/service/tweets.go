@@ -39,7 +39,7 @@ func (t *Tweets) unregisterWriter(query string) {
 	t.Unlock()
 }
 
-func (t *Tweets) streamAndRecordFreshTweets(query string, history datamapper.Tweets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
+func (t *Tweets) copyAndRecordTweets(query string, history datamapper.Tweets, freshTweets domain.Tweets, out chan domain.Tweet, stop chan bool) {
 	writeHistory := false
 	defer func() {
 		if writeHistory {
@@ -75,7 +75,7 @@ func (t *Tweets) Tweets(query string, startTime time.Time) domain.Tweets {
 	go func() {
 		defer close(out)
 		copyTweets(replayTweets, out)
-		t.streamAndRecordFreshTweets(query, history, freshTweets, out, stop)
+		t.copyAndRecordTweets(query, history, freshTweets, out, stop)
 	}()
 	return tweets
 }
