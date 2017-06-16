@@ -6,6 +6,7 @@ services:
     - "8080:8080"
   recorder:
     build: recorder/.
+    command: ["-tweetsURL", "http://ingestor:8080/tweets"]
     ports:
     - "8085:8085"
     volumes:
@@ -14,6 +15,7 @@ services:
     - ingestor
   stopwordfilter:
     build: stopwordfilter/.
+    command: ["-tweetsURL", "http://recorder:8085/tweets"]
     ports:
     - "8081:8081"
     volumes:
@@ -22,12 +24,16 @@ services:
     - recorder
   wordcounter:
     build: wordcounter/.
+    command: ["-tweetsURL", "http://stopwordfilter:8081/tweets"]
     ports:
     - "8082:8082"
     links:
     - stopwordfilter
   windower:
     build: windower/.
+    command: [
+      "-wordCountsURL", "http://wordcounter:8082/tweets",
+      "-searchesURL", "http://searches:8084/tweets"]
     ports:
     - "8083:8083"
     links:
