@@ -64,7 +64,6 @@ func (s *Searches) Create(w http.ResponseWriter, r *http.Request, p httprouter.P
 		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
 		return
 	}
-
 	je := json.NewEncoder(w)
 	je.Encode(search)
 }
