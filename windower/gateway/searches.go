@@ -12,7 +12,7 @@ import (
 
 // Searches is a gateway to a Search service
 type Searches interface {
-	ForID(ID string) (*domain.Search, error)
+	ForID(ID domain.SearchID) (*domain.Search, error)
 }
 
 // HTTPSearches is a gateway to a HTTP Search service

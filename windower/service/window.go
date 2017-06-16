@@ -12,7 +12,7 @@ type Window struct {
 	sync.Mutex
 	tweetWordCountsGateway gateway.TweetWordCounts
 	searchesGateway        gateway.Searches
-	forSearch              map[string]*domain.Window
+	forSearch              map[domain.SearchID]*domain.Window
 }
 
 func NewWindow(
@@ -22,11 +22,11 @@ func NewWindow(
 	return &Window{
 		tweetWordCountsGateway: tweetWordCountsGateway,
 		searchesGateway:        searchesGateway,
-		forSearch:              map[string]*domain.Window{},
+		forSearch:              map[domain.SearchID]*domain.Window{},
 	}
 }
 
-func (w *Window) Totals(searchID string) (domain.WordCount, error) {
+func (w *Window) Totals(searchID domain.SearchID) (domain.WordCount, error) {
 	w.Lock()
 	window, ok := w.forSearch[searchID]
 	w.Unlock()
