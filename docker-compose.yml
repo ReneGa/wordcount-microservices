@@ -1,0 +1,42 @@
+version: '1'
+services:
+  ingestor:
+    build: ingestor/.
+    ports:
+    - "8080:8080"
+  recorder:
+    build: recorder/.
+    ports:
+    - "8085:8085"
+    volumes:
+    - ./recorder/:/data/
+    links:
+    - ingestor
+  stopwordfilter:
+    build: stopwordfilter/.
+    ports:
+    - "8081:8081"
+    volumes:
+    - ./stopwords/:/stopwords/
+    links:
+    - recorder
+  wordcounter:
+    build: wordcounter/.
+    ports:
+    - "8082:8082"
+    links:
+    - stopwordfilter
+  windower:
+    build: windower/.
+    ports:
+    - "8083:8083"
+    links:
+    - wordcounter
+    - searches
+  searches:
+    build: searches/.
+    ports:
+    - "8084:8084"
+    volumes:
+    - ./searches/:/data/
+    
