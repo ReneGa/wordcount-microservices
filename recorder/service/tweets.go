@@ -52,7 +52,7 @@ func (t *Tweets) copyAndRecordTweets(query string, history datamapper.Tweets, fr
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
-			writeHistory := t.attemptToRegisterWriter(query)
+			writeHistory = t.attemptToRegisterWriter(query)
 			if writeHistory {
 				history.Append(tweet)
 			}
