@@ -5,8 +5,6 @@ import (
 
 	"encoding/json"
 
-	"strconv"
-
 	"github.com/ReneGa/tweetcount-microservices/searches/datamapper"
 	"github.com/ReneGa/tweetcount-microservices/searches/domain"
 	"github.com/julienschmidt/httprouter"
@@ -47,16 +45,13 @@ func (s *Searches) GetAll(w http.ResponseWriter, r *http.Request, p httprouter.P
 
 // Create creates a new search
 func (s *Searches) Create(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	query := r.URL.Query().Get("q")
-	seconds, err := strconv.Atoi(r.URL.Query().Get("seconds"))
+	var newSearch domain.Search
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&newSearch)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(http.StatusText(http.StatusBadRequest)))
 		return
-	}
-	newSearch := domain.Search{
-		Query:               query,
-		WindowLengthSeconds: seconds,
 	}
 	search, err := s.SearchesDataMapper.Save(&newSearch)
 	if err != nil {
