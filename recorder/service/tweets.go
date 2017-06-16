@@ -22,7 +22,10 @@ func copyTweets(from chan domain.Tweet, to chan domain.Tweet) {
 	}
 }
 
-func (t *Tweets) registerWriter(query string) bool {
+// attemptToRegisterWriter attempts to register a history writer
+// and returns a boolean indicating whether the registration was
+// successful.
+func (t *Tweets) attemptToRegisterWriter(query string) bool {
 	t.Lock()
 	if t.writerRegistered == nil {
 		t.writerRegistered = map[string]bool{}
@@ -49,7 +52,7 @@ func (t *Tweets) copyAndRecordTweets(query string, history datamapper.Tweets, fr
 	for {
 		select {
 		case tweet := <-freshTweets.Data:
-			writeHistory := t.registerWriter(query)
+			writeHistory := t.attemptToRegisterWriter(query)
 			if writeHistory {
 				history.Append(tweet)
 			}
