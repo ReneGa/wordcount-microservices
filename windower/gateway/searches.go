@@ -25,7 +25,7 @@ type HTTPSearches struct {
 var ErrSearchNotFound = errors.New("search not found")
 
 // ForID returns the search for the given ID
-func (s *HTTPSearches) ForID(ID string) (*domain.Search, error) {
+func (s *HTTPSearches) ForID(ID domain.SearchID) (*domain.Search, error) {
 	url := fmt.Sprintf("%s/%s", s.URL, ID)
 	res, err := s.Client.Get(url)
 	if err != nil {

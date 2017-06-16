@@ -5,6 +5,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/ReneGa/tweetcount-microservices/windower/domain"
 	"github.com/ReneGa/tweetcount-microservices/windower/service"
 	"github.com/julienschmidt/httprouter"
 )
@@ -16,7 +17,7 @@ type Totals struct {
 
 // GET writes the current window state to the response
 func (t *Totals) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	searchID := p.ByName("searchID")
+	searchID := domain.SearchID(p.ByName("searchID"))
 	totals, err := t.Service.Totals(searchID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
