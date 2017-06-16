@@ -1,8 +1,8 @@
 # Build all the binaries
 export GOOS=linux
 
-for component in ingestor recorder searches stopwordfilter windower wordcounter; do
-    echo "building $component"
+for component in ingestor stopwordfilter wordcounter; do
+    echo "Compiling $component"
     cd $component
     go build
     chmod +x $component
