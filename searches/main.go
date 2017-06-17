@@ -17,6 +17,8 @@ import (
 var address = flag.String("address", "localhost:8084", "Address to listen on")
 
 func main() {
+	flag.Parse()
+
 	db, err := sql.Open("sqlite3", "./searches.db")
 	if err != nil {
 		log.Fatal(err)
