@@ -22,11 +22,11 @@ func main() {
 		Client: http.DefaultClient,
 		URL:    *wordCountsURL,
 	}
-	searchesService := &gateway.HTTPSearches{
+	searchesGateway := &gateway.HTTPSearches{
 		Client: http.DefaultClient,
 		URL:    *searchesURL,
 	}
-	windowService := service.NewWindow(tweetWordCountsGateway, searchesService)
+	windowService := service.NewWindow(tweetWordCountsGateway, searchesGateway)
 	totalsResource := resource.Totals{
 		Service: windowService,
 	}
