@@ -36,13 +36,13 @@ func decodeResponse(res *http.Response, data chan domain.TweetWordCount, stop ch
 		case <-stop:
 			return decodeStopped
 		default:
-			var tweet domain.TweetWordCount
-			err := jd.Decode(&tweet)
+			var tweetWordCount domain.TweetWordCount
+			err := jd.Decode(&tweetWordCount)
 			if err != nil {
 				return decodeError
 			}
 			select {
-			case data <- tweet:
+			case data <- tweetWordCount:
 			case <-stop:
 				return decodeStopped
 			}
