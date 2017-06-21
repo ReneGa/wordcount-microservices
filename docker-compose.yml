@@ -1,48 +1,90 @@
 version: '3'
+networks:
+  backend:
 services:
   ingestor:
     build: ingestor/.
+    command: [
+      "-address", ":8080"
+    ]
+    expose:
+    - 8080
     ports:
     - "8080:8080"
-  recorder:
-    build: recorder/.
-    command: ["-tweetsURL", "http://ingestor:8080/tweets"]
-    ports:
-    - "8085:8085"
-    volumes:
-    - ./recorder/:/data/
-    links:
-    - ingestor
+    networks:
+    - backend
+    environment:
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_KEY_SECRET
+      - TWITTER_ACCESS_TOKEN
+      - TWITTER_ACCESS_TOKEN_SECRET
+  # recorder:
+  #   build: recorder/.
+  #   command: [
+  #     "-address", ":8085"
+  #     "-tweetsURL", "http://ingestor:8080/tweets"
+  #   ]
+  #   expose:
+  #   - 8085
+  #   ports:
+  #   - "8085:8085"
+  #   volumes:
+  #   - ./recorder/:/data/
+  #   depends_on:
+  #   - ingestor
   stopwordfilter:
     build: stopwordfilter/.
-    command: ["-tweetsURL", "http://recorder:8085/tweets"]
+    command: [
+      "-address", ":8081",
+      "-tweetsURL", "http://ingestor:8080/tweets"
+      ]
+    expose:
+    - 8081
     ports:
     - "8081:8081"
     volumes:
     - ./stopwords/:/stopwords/
-    links:
-    - recorder
+    networks:
+    - backend
+    depends_on:
+    - ingestor
   wordcounter:
     build: wordcounter/.
-    command: ["-tweetsURL", "http://stopwordfilter:8081/tweets"]
+    command: [
+      "-address", ":8082",
+      "-tweetsURL", "http://stopwordfilter:8081/tweets"
+    ]
+    expose:
+    - 8082
     ports:
     - "8082:8082"
-    links:
+    networks:
+    - backend
+    depends_on:
     - stopwordfilter
-  windower:
-    build: windower/.
-    command: [
-      "-wordCountsURL", "http://wordcounter:8082/tweets",
-      "-searchesURL", "http://searches:8084/searches"]
-    ports:
-    - "8083:8083"
-    links:
-    - wordcounter
-    - searches
-  searches:
-    build: searches/.
-    ports:
-    - "8084:8084"
-    volumes:
-    - ./searches/:/data/
+  # windower:
+  #   build: windower/.
+  #   command: [
+  #     "-address", ":8083",
+  #     "-wordCountsURL", "http://wordcounter:8082/tweets",
+  #     "-searchesURL", "http://searches:8084/searches"
+  #   ]
+  #   expose:
+  #   - 8083
+  #   ports:
+  #   - "8083:8083"
+  #   depends_on:
+  #   - wordcounter
+  #   - searches
+  # searches:
+  #   build: searches/.
+  #   command: [
+  #     "-address", ":8084",
+  #   ]
+  #   expose:
+  #   - 8084
+  #   ports:
+  #   - "8084:8084"
+  #   volumes:
+  #   - ./searches/:/data/
     
