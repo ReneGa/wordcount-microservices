@@ -33,7 +33,7 @@ services:
     build: windower/.
     command: [
       "-wordCountsURL", "http://wordcounter:8082/tweets",
-      "-searchesURL", "http://searches:8084/tweets"]
+      "-searchesURL", "http://searches:8084/searches"]
     ports:
     - "8083:8083"
     links:
