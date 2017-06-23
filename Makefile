@@ -1,4 +1,4 @@
-.PHONY: all clean ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter
+.PHONY: clean ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter
 
 all: ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter
 
