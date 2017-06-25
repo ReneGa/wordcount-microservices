@@ -42,8 +42,8 @@ services:
     - 8081
     ports:
     - "8081:8081"
-    volumes:
-    - ./stopwords/:/stopwords/
+#    volumes:
+#    - ./stopwords/stopwords:/stopwords/
     networks:
     - backend
     depends_on:
