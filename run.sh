@@ -1,13 +1,6 @@
 # Build all the binaries
-export GOOS=linux
-
-for component in ingestor stopwordfilter wordcounter; do
-    echo "Compiling $component"
-    cd $component
-    go build
-    chmod +x $component
-    cd ..
-done
+make all
 
 # build dockerfiles and run them
+docker-compose build
 docker-compose up
