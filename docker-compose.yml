@@ -3,7 +3,7 @@ networks:
   backend:
 services:
   ingestor:
-    build: ingestor/.
+    build: ingestor
     command: [
       "-address", ":8080"
     ]
@@ -19,7 +19,7 @@ services:
       - TWITTER_ACCESS_TOKEN
       - TWITTER_ACCESS_TOKEN_SECRET
   # recorder:
-  #   build: recorder/.
+  #   build: recorder
   #   command: [
   #     "-address", ":8085"
   #     "-tweetsURL", "http://ingestor:8080/tweets"
@@ -33,7 +33,7 @@ services:
   #   depends_on:
   #   - ingestor
   stopwordfilter:
-    build: stopwordfilter/.
+    build: stopwordfilter
     command: [
       "-address", ":8081",
       "-tweetsURL", "http://ingestor:8080/tweets"
@@ -49,7 +49,7 @@ services:
     depends_on:
     - ingestor
   wordcounter:
-    build: wordcounter/.
+    build: wordcounter
     command: [
       "-address", ":8082",
       "-tweetsURL", "http://stopwordfilter:8081/tweets"
@@ -63,10 +63,10 @@ services:
     depends_on:
     - stopwordfilter
   windower:
-    build: windower/.
+    build: windower
     command: [
       "-address", ":8083",
-      "-wordCountsURL", "http://wordcounter:8082/tweets",
+      "-wordCountsURL", "http://wordcounter:8082/wordcounts",
       "-searchesURL", "http://searches:8084/searches"
     ]
     expose:
@@ -79,7 +79,7 @@ services:
     - wordcounter
     - searches
   searches:
-    build: searches/.
+    build: searches
     command: [
       "-address", ":8084",
     ]
