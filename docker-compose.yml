@@ -76,15 +76,14 @@ services:
   #   depends_on:
   #   - wordcounter
   #   - searches
-  # searches:
-  #   build: searches/.
-  #   command: [
-  #     "-address", ":8084",
-  #   ]
-  #   expose:
-  #   - 8084
-  #   ports:
-  #   - "8084:8084"
-  #   volumes:
-  #   - ./searches/:/data/
-    
+  searches:
+    build: searches/.
+    command: [
+      "-address", ":8084",
+    ]
+    expose:
+    - 8084
+    ports:
+    - "8084:8084"
+    volumes:
+    - ./searches/:/data/
