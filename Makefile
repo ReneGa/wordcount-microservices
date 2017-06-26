@@ -3,9 +3,11 @@
 all: ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter searches/searches windower/windower
 
 clean:
-	rm -f ingestor/ingestor &&\
-	rm -f stopwordfilter/stopwordfilter &&\
-	rm -f wordcounter/wordcounter
+	cd ingestor && $(MAKE) clean
+	cd stopwordfilter && $(MAKE) clean
+	cd wordcounter && $(MAKE) clean
+	cd searches && $(MAKE) clean
+	cd windower && $(MAKE) clean
 
 ingestor/ingestor:
 	cd ingestor && $(MAKE)
