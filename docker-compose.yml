@@ -62,20 +62,22 @@ services:
     - backend
     depends_on:
     - stopwordfilter
-  # windower:
-  #   build: windower/.
-  #   command: [
-  #     "-address", ":8083",
-  #     "-wordCountsURL", "http://wordcounter:8082/tweets",
-  #     "-searchesURL", "http://searches:8084/searches"
-  #   ]
-  #   expose:
-  #   - 8083
-  #   ports:
-  #   - "8083:8083"
-  #   depends_on:
-  #   - wordcounter
-  #   - searches
+  windower:
+    build: windower/.
+    command: [
+      "-address", ":8083",
+      "-wordCountsURL", "http://wordcounter:8082/tweets",
+      "-searchesURL", "http://searches:8084/searches"
+    ]
+    expose:
+    - 8083
+    ports:
+    - "8083:8083"
+    networks:
+    - backend
+    depends_on:
+    - wordcounter
+    - searches
   searches:
     build: searches/.
     command: [
