@@ -1,6 +1,6 @@
-.PHONY: clean ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter searches/searches windower/windower
+.PHONY: clean ingestor stopwordfilter wordcounter searches windower
 
-all: ingestor/ingestor stopwordfilter/stopwordfilter wordcounter/wordcounter searches/searches windower/windower
+all: ingestor stopwordfilter wordcounter searches windower
 
 clean:
 	cd ingestor && $(MAKE) clean
@@ -9,17 +9,17 @@ clean:
 	cd searches && $(MAKE) clean
 	cd windower && $(MAKE) clean
 
-ingestor/ingestor:
+ingestor:
 	cd ingestor && $(MAKE)
 
-stopwordfilter/stopwordfilter:
+stopwordfilter:
 	cd stopwordfilter && $(MAKE)
 
-wordcounter/wordcounter:
+wordcounter:
 	cd wordcounter && $(MAKE)
 
-searches/searches:
+searches:
 	cd searches && $(MAKE)
 
-windower/windower:
+windower:
 	cd windower && $(MAKE)
