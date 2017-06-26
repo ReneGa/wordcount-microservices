@@ -30,6 +30,8 @@ services:
   #   - "8085:8085"
   #   volumes:
   #   - ./recorder/:/data/
+  #   networks:
+  #   - backend
   #   depends_on:
   #   - ingestor
   stopwordfilter:
