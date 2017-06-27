@@ -61,7 +61,7 @@ func (t *TweetBuckets) appendToBucket(bucket bucketID, tweet domain.Tweet) error
 	return je.Encode(tweet)
 }
 
-func (t *TweetBuckets) readBucket(bucket bucketID, startTime time.Time, out chan domain.Tweet) error {
+func (t *TweetBuckets) readBucketFromTime(bucket bucketID, startTime time.Time, out chan domain.Tweet) error {
 	f, err := os.OpenFile(t.bucketFileName(bucket), os.O_RDONLY, bucketFileMode)
 	if err != nil {
 		return err
@@ -84,11 +84,11 @@ func (t *TweetBuckets) readBucket(bucket bucketID, startTime time.Time, out chan
 	return nil
 }
 
-func (t *TweetBuckets) readStartingFromBucket(startBucket bucketID, startTime time.Time, out chan domain.Tweet) error {
+func (t *TweetBuckets) readStartingFromBucketAndTime(startBucket bucketID, startTime time.Time, out chan domain.Tweet) error {
 	defer close(out)
 	buckets := t.listBucketsAfter(startBucket)
 	for _, bucket := range buckets {
-		err := t.readBucket(bucket, startTime, out)
+		err := t.readBucketFromTime(bucket, startTime, out)
 		if err != nil {
 			panic(err)
 		}
@@ -103,5 +103,5 @@ func (t *TweetBuckets) Append(tweet domain.Tweet) {
 
 func (t *TweetBuckets) ReplayFrom(startTime time.Time, out chan domain.Tweet) error {
 	bucket := t.bucketForTime(startTime)
-	return t.readStartingFromBucket(bucket, startTime, out)
+	return t.readStartingFromBucketAndTime(bucket, startTime, out)
 }

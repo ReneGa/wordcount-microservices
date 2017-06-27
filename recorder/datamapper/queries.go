@@ -1,6 +1,7 @@
 package datamapper
 
 import (
+	"net/url"
 	"os"
 	"path"
 	"sync"
@@ -23,7 +24,7 @@ func (q *Queries) initBuckets() {
 }
 
 func (q *Queries) createBuckets(query string) Tweets {
-	bucketsDirectory := path.Join(q.Directory, query)
+	bucketsDirectory := path.Join(q.Directory, url.QueryEscape(query))
 	os.MkdirAll(bucketsDirectory, bucketsDirectoryMode)
 
 	buckets := &TweetBuckets{
