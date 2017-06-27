@@ -44,7 +44,7 @@ func (t *Tweets) removeConsumerForQuery(query string, i int) {
 	consumers := t.tweetConsumersForQuery[query]
 	t.tweetConsumersForQuery[query] = append(
 		consumers[0:i],
-		consumers[i:len(consumers)]...,
+		consumers[i+1:len(consumers)]...,
 	)
 }
 
