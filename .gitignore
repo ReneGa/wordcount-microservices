@@ -4,6 +4,7 @@ searches/searches
 stopwordfilter/stopwordfilter
 windower/windower
 wordcounter/wordcounter
+persister/buckets
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o

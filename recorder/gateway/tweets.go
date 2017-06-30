@@ -7,12 +7,12 @@ import (
 
 	"encoding/json"
 
-	"github.com/ReneGa/tweetcount-microservices/stopwordfilter/domain"
+	"github.com/ReneGa/tweetcount-microservices/recorder/domain"
 )
 
 // Tweets is a gateway to a tweet producing service
 type Tweets interface {
-	Tweets(query string, offset string) domain.Tweets
+	Tweets(query string) domain.Tweets
 }
 
 // HTTPTweets is the gateway to get tweets over http
@@ -30,13 +30,13 @@ const (
 
 func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) decodeResult {
 	defer res.Body.Close()
-	var tweet domain.Tweet
 	jd := json.NewDecoder(res.Body)
 	for {
 		select {
 		case <-stop:
 			return decodeStopped
 		default:
+			var tweet domain.Tweet
 			err := jd.Decode(&tweet)
 			if err != nil {
 				return decodeError
@@ -51,8 +51,8 @@ func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) 
 }
 
 // Tweets return a stream of tweets for a given search query
-func (t *HTTPTweets) Tweets(query string, offset string) domain.Tweets {
-	url := fmt.Sprintf("%s?q=%s&t=%s", t.URL, query, offset)
+func (t *HTTPTweets) Tweets(query string) domain.Tweets {
+	url := fmt.Sprintf("%s?q=%s", t.URL, query)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)

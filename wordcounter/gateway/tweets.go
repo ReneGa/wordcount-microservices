@@ -12,7 +12,7 @@ import (
 
 // Tweets is a gateway to a tweet producing service
 type Tweets interface {
-	Tweets(query string) domain.Tweets
+	Tweets(query string, offset string) domain.Tweets
 }
 
 // HTTPTweets is the gateway to get tweets over http
@@ -41,14 +41,18 @@ func decodeResponse(res *http.Response, data chan domain.Tweet, stop chan bool) 
 			if err != nil {
 				return decodeError
 			}
-			data <- tweet
+			select {
+			case data <- tweet:
+			case <-stop:
+				return decodeStopped
+			}
 		}
 	}
 }
 
 // Tweets return a stream of tweets for a given search query
-func (t *HTTPTweets) Tweets(query string) domain.Tweets {
-	url := fmt.Sprintf("%s?q=%s", t.URL, query)
+func (t *HTTPTweets) Tweets(query string, offset string) domain.Tweets {
+	url := fmt.Sprintf("%s?q=%s&t=%s", t.URL, query, offset)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
