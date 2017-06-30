@@ -9,5 +9,5 @@ type BucketFileNamer interface {
 type RFC3339BucketFileNamer struct{}
 
 func (_ RFC3339BucketFileNamer) Name(bucketTime time.Time) string {
-	return bucketTime.Format(time.RFC3339)
+	return bucketTime.In(time.UTC).Format(time.RFC3339)
 }
