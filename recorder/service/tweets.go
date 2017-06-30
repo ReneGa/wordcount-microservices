@@ -44,10 +44,9 @@ func copyStoppableTweets(from domain.Tweets, to chan domain.Tweet, stop chan boo
 
 func (t *Tweets) removeConsumerForQuery(query string, i int) {
 	consumers := t.tweetConsumersForQuery[query]
-	t.tweetConsumersForQuery[query] = append(
-		consumers[0:i],
-		consumers[i+1:len(consumers)]...,
-	)
+	consumers[i] = consumers[len(consumers)-1]
+	consumers = consumers[:len(consumers)-1]
+	t.tweetConsumersForQuery[query] = consumers
 }
 
 func panicOnErr(err error) {
