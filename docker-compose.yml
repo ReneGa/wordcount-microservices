@@ -18,27 +18,27 @@ services:
       - TWITTER_CONSUMER_KEY_SECRET
       - TWITTER_ACCESS_TOKEN
       - TWITTER_ACCESS_TOKEN_SECRET
-  # recorder:
-  #   build: recorder
-  #   command: [
-  #     "-address", ":8085"
-  #     "-tweetsURL", "http://ingestor:8080/tweets"
-  #   ]
-  #   expose:
-  #   - 8085
-  #   ports:
-  #   - "8085:8085"
-  #   volumes:
-  #   - ./recorder/:/data/
-  #   networks:
-  #   - backend
-  #   depends_on:
-  #   - ingestor
+  recorder:
+    build: recorder
+    command: [
+      "-address", ":8085",
+      "-tweetsURL", "http://ingestor:8080/tweets"
+    ]
+    expose:
+    - 8085
+    ports:
+    - "8085:8085"
+    volumes:
+    - ./recorder/buckets:/buckets/
+    networks:
+    - backend
+    depends_on:
+     - ingestor
   stopwordfilter:
     build: stopwordfilter
     command: [
       "-address", ":8081",
-      "-tweetsURL", "http://ingestor:8080/tweets"
+      "-tweetsURL", "http://recorder:8085/tweets"
       ]
     expose:
     - 8081
@@ -49,7 +49,7 @@ services:
     networks:
     - backend
     depends_on:
-    - ingestor
+    - recorder
   wordcounter:
     build: wordcounter
     command: [
