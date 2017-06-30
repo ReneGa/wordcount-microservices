@@ -1,0 +1,95 @@
+version: '3'
+networks:
+  backend:
+services:
+  ingestor:
+    build: ingestor
+    command: [
+      "-address", ":8080"
+    ]
+    expose:
+    - 8080
+    ports:
+    - "8080:8080"
+    networks:
+    - backend
+    environment:
+      - TWITTER_CONSUMER_KEY
+      - TWITTER_CONSUMER_KEY_SECRET
+      - TWITTER_ACCESS_TOKEN
+      - TWITTER_ACCESS_TOKEN_SECRET
+  # recorder:
+  #   build: recorder
+  #   command: [
+  #     "-address", ":8085"
+  #     "-tweetsURL", "http://ingestor:8080/tweets"
+  #   ]
+  #   expose:
+  #   - 8085
+  #   ports:
+  #   - "8085:8085"
+  #   volumes:
+  #   - ./recorder/:/data/
+  #   networks:
+  #   - backend
+  #   depends_on:
+  #   - ingestor
+  stopwordfilter:
+    build: stopwordfilter
+    command: [
+      "-address", ":8081",
+      "-tweetsURL", "http://ingestor:8080/tweets"
+      ]
+    expose:
+    - 8081
+    ports:
+    - "8081:8081"
+#    volumes:
+#    - ./stopwords/stopwords:/stopwords/
+    networks:
+    - backend
+    depends_on:
+    - ingestor
+  wordcounter:
+    build: wordcounter
+    command: [
+      "-address", ":8082",
+      "-tweetsURL", "http://stopwordfilter:8081/tweets"
+    ]
+    expose:
+    - 8082
+    ports:
+    - "8082:8082"
+    networks:
+    - backend
+    depends_on:
+    - stopwordfilter
+  windower:
+    build: windower
+    command: [
+      "-address", ":8083",
+      "-wordCountsURL", "http://wordcounter:8082/wordcounts",
+      "-searchesURL", "http://searches:8084/searches"
+    ]
+    expose:
+    - 8083
+    ports:
+    - "8083:8083"
+    networks:
+    - backend
+    depends_on:
+    - wordcounter
+    - searches
+  searches:
+    build: searches
+    command: [
+      "-address", ":8084",
+    ]
+    expose:
+    - 8084
+    networks:
+    - backend
+    ports:
+    - "8084:8084"
+    volumes:
+    - ./searches/:/data/

@@ -26,28 +26,15 @@ func NewWindow(
 	}
 }
 
-func (w *Window) Totals(searchID domain.SearchID) (domain.WordCount, error) {
-	w.Lock()
-	window, ok := w.forSearch[searchID]
-	w.Unlock()
-	if ok {
-		w.Lock()
-		defer w.Unlock()
-		totals := domain.WordCount{}
-		for word, count := range window.Totals {
-			totals[word] = count
-		}
-		return totals, nil
-	}
-
+func (w *Window) createNewWindow(searchID domain.SearchID) error {
 	// Fetch search from searches service
 	search, err := w.searchesGateway.ForID(searchID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Create new window
-	window = domain.NewWindow(search.WindowLengthSeconds, 16384) // TODO: Read from config
+	window := domain.NewWindow(search.WindowLengthSeconds, 16384) // TODO: Read from config
 
 	// Write into forSearch map
 	w.Lock()
@@ -63,6 +50,23 @@ func (w *Window) Totals(searchID domain.SearchID) (domain.WordCount, error) {
 			w.Unlock()
 		}
 	}()
+	return nil
+}
 
+func (w *Window) Totals(searchID domain.SearchID) (domain.WordCount, error) {
+	w.Lock()
+	window, ok := w.forSearch[searchID]
+	w.Unlock()
+
+	if ok {
+		w.Lock()
+		defer w.Unlock()
+		return window.Totals.Copy(), nil
+	}
+
+	err := w.createNewWindow(searchID)
+	if err != nil {
+		return nil, err
+	}
 	return domain.WordCount{}, nil
 }
