@@ -12,7 +12,7 @@ import (
 
 // Tweets is the tweets resource
 type Tweets struct {
-	Service service.Tweets
+	Service *service.Tweets
 }
 
 // GET streams tweets from Twitter for a given search query

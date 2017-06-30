@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ReneGa/tweetcount-microservices/generic"
 	"github.com/ReneGa/tweetcount-microservices/recorder/datamapper"
 	"github.com/ReneGa/tweetcount-microservices/recorder/gateway"
 	"github.com/ReneGa/tweetcount-microservices/recorder/resource"
@@ -22,15 +23,20 @@ var tweetsURL = flag.String("tweetsURL", "http://localhost:8080/tweets", "URL of
 func main() {
 	flag.Parse()
 
-	queriesDataMapper := &datamapper.Queries{
-		Directory:      *bucketsDirectory,
-		BucketDuration: *bucketDuration,
+	queriesDataMapper := &datamapper.JSONFileTweetBucketsPerQuery{
+		IOUtil:    &generic.RealIOUtil{},
+		OS:        &generic.RealOS{},
+		FileNamer: datamapper.RFC3339BucketFileNamer{},
+		FileMode:  0777,
+		Directory: *bucketsDirectory,
+		Duration:  *bucketDuration,
 	}
+
 	tweetsGateway := &gateway.HTTPTweets{
 		Client: http.DefaultClient,
 		URL:    *tweetsURL,
 	}
-	tweetsService := service.Tweets{
+	tweetsService := &service.Tweets{
 		DataMapper: queriesDataMapper,
 		Gateway:    tweetsGateway,
 	}
