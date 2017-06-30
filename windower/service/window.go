@@ -42,7 +42,8 @@ func (w *Window) createNewWindow(searchID domain.SearchID) error {
 	w.Unlock()
 
 	go func() {
-		tweetWordCounts := w.tweetWordCountsGateway.TweetWordCounts(search.Query)
+		windowDuration := time.Second * time.Duration(search.WindowLengthSeconds)
+		tweetWordCounts := w.tweetWordCountsGateway.TweetWordCounts(search.Query, windowDuration.String())
 		for tweetWordCount := range tweetWordCounts.Data {
 			w.Lock()
 			window.Enqueue(tweetWordCount)

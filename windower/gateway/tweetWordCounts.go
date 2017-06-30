@@ -12,7 +12,7 @@ import (
 
 // TweetWordCounts is a gateway to a TweetWordCount producing service
 type TweetWordCounts interface {
-	TweetWordCounts(query string) domain.TweetWordCounts
+	TweetWordCounts(query string, offset string) domain.TweetWordCounts
 }
 
 // HTTPTweetWordCounts is the gateway to get tweets over http
@@ -51,8 +51,8 @@ func decodeResponse(res *http.Response, data chan domain.TweetWordCount, stop ch
 }
 
 // TweetWordCounts returns a stream of TweetWordCounts for a given search query
-func (t *HTTPTweetWordCounts) TweetWordCounts(query string) domain.TweetWordCounts {
-	url := fmt.Sprintf("%s?q=%s", t.URL, query)
+func (t *HTTPTweetWordCounts) TweetWordCounts(query string, offset string) domain.TweetWordCounts {
+	url := fmt.Sprintf("%s?q=%s&t=%s", t.URL, query, offset)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
