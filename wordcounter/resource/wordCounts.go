@@ -17,8 +17,9 @@ type WordCounts struct {
 // GET writes a stream of tweet word counts to the response
 func (t *WordCounts) GET(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	query := r.URL.Query().Get("q")
+	offset := r.URL.Query().Get("t")
 
-	tweets := t.Gateway.Tweets(query)
+	tweets := t.Gateway.Tweets(query, offset)
 
 	go func() {
 		tweets.Stop <- <-w.(http.CloseNotifier).CloseNotify()

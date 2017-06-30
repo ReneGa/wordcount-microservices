@@ -47,17 +47,23 @@ func (a twitter) Tweets(query string) domain.Tweets {
 		for {
 			select {
 			case item := <-items:
-				itemValue := reflect.ValueOf(item)
-				Text := itemValue.FieldByName("Text").String()
-				ID := itemValue.FieldByName("IdStr").String()
-				Language := itemValue.FieldByName("Lang").String()
-				timeString := itemValue.FieldByName("CreatedAt").String()
-				Time, _ := time.Parse(time.RubyDate, timeString)
-				out <- domain.Tweet{
-					Text:     Text,
-					ID:       ID,
-					Time:     Time,
-					Language: Language,
+				if item != nil {
+					itemValue := reflect.ValueOf(item)
+					Text := itemValue.FieldByName("Text").String()
+					ID := itemValue.FieldByName("IdStr").String()
+					Language := itemValue.FieldByName("Lang").String()
+					timeString := itemValue.FieldByName("CreatedAt").String()
+					Time, _ := time.Parse(time.RubyDate, timeString)
+					select {
+					case out <- domain.Tweet{
+						Text:     Text,
+						ID:       ID,
+						Time:     Time,
+						Language: Language,
+					}:
+					case <-stop:
+						return
+					}
 				}
 			case <-stop:
 				return
