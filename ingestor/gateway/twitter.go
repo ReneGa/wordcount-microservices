@@ -70,6 +70,7 @@ func (a twitter) Tweets(query string) domain.Tweets {
 	stream := api.PublicStreamFilter(url.Values{
 		"track": {query},
 	})
+
 	out := make(chan domain.Tweet)
 	stop := make(chan bool)
 
