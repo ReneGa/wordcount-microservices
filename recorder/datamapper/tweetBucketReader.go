@@ -39,7 +39,7 @@ func (r *JSONFileTweetBucketReader) ReplayFrom(startTime time.Time, out chan dom
 		if err != nil {
 			return err
 		}
-		if tweet.Time.After(startTime) {
+		if tweet.Time.Equal(startTime) || tweet.Time.After(startTime) {
 			out <- tweet
 		}
 	}
